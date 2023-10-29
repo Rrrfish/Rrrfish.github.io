@@ -274,7 +274,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2023-10-29 18:25:36 / 修改时间：19:15:41" itemprop="dateCreated datePublished" datetime="2023-10-29T18:25:36+08:00">2023-10-29</time>
+              <time title="创建时间：2023-10-29 18:25:36 / 修改时间：19:25:02" itemprop="dateCreated datePublished" datetime="2023-10-29T18:25:36+08:00">2023-10-29</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -302,32 +302,14 @@
 
       
           <p>本文内容包括执行环境、控制流、进程和文件。</p>
-<!---more-->
-
-<h3 id="执行环境-Execution-Environment"><a href="#执行环境-Execution-Environment" class="headerlink" title="执行环境  Execution Environment"></a>执行环境  Execution Environment</h3><p>它负责给在其上运行的软件提供享用的功能和资源。比如：对于Java虚拟机来说，它的执行环境就是操作系统内核；对于（直接运行在裸机硬件上的）操作系统，它的执行环境是计算机硬件；在云计算时代，传统计算机操作系统和硬件之间多了一层Hypervisor&#x2F;VMM，操作系统内核的执行环境就变成了Hypervisor&#x2F;VMM。</p>
-<p>CPU在执行过程中，可以在不同层次的执行环境之间切换，这称为 <strong>执行环境切换</strong> 。</p>
-<p>在最后，课本给出了应用程序执行环境的一个基本的定义：</p>
-<p><em>执行环境是应用程序正确运行所需的服务与管理环境，用来完成应用程序在运行时的数据与资源管理、应用程序的生存期等方面的处理，它定义了应用程序有权访问的其他数据或资源，并决定了应用程序的行为限制范围。</em></p>
-<h3 id="控制流-Control-Flow"><a href="#控制流-Control-Flow" class="headerlink" title="控制流 Control Flow"></a>控制流 Control Flow</h3><h4 id="普通控制流"><a href="#普通控制流" class="headerlink" title="普通控制流"></a>普通控制流</h4><p>我的理解是，先行执行的序列，比如一行行的源代码、一条条的汇编指令。</p>
-<p>在应用程序的眼里，它只能接触他所在的执行环境，不会跳转到其他执行环境（实际上在cpu眼里会发生跳转，比如异常控制流，只是应用程序“看不见”），所以应用程序执行基本上是以普通控制流的形式完成整个运行过程。</p>
-<h4 id="异常控制流"><a href="#异常控制流" class="headerlink" title="异常控制流"></a>异常控制流</h4><p>我的理解为，它相对于普通控制流，更是一种处理器角度上的概念，处理器在执行应用程序的时候，很可能会碰到一些意外情况，比如系统调用请求、外设终端、CPU异常等，这个时候处理器就要执行与之前应用程序不相干的指令，处理器执行的前一条指令和后一条指令将会位于两个完全不同的位置，即不同的执行环境 。这种控制流的突变叫做执行环境切换，我们把这种突变的控制流称你为异常控制流。</p>
-<h4 id="控制流上下文（执行环境的状态）"><a href="#控制流上下文（执行环境的状态）" class="headerlink" title="控制流上下文（执行环境的状态）"></a>控制流上下文（执行环境的状态）</h4><p>控制流在执行完某指令时的物理资源内容，即确保下一时刻能继续 <em>正确</em> 执行控制流指令的物理资源内容称为控制流的 <strong>上下文</strong> (Context) ，也可称为控制流所在执行环境的状态。</p>
-<p>这里强调正确是因为，控制流执行过程中，可能会发生一些控制流上下文发生变化的情况，比如寄存器或者内存某块需要的数据被改变了，会导致之后的执行结果出现问题（不符合预期），这叫做<strong>程序执行错误</strong>。</p>
-<p>为了避免这种情况，操作系统需要保护控制流上下文。</p>
-<h4 id="异常控制流的分类"><a href="#异常控制流的分类" class="headerlink" title="异常控制流的分类"></a>异常控制流的分类</h4><h5 id="中断-Interrupt"><a href="#中断-Interrupt" class="headerlink" title="中断 Interrupt"></a>中断 Interrupt</h5><p>外设 <strong>中断</strong> 是指由外部设备引起的外部I&#x2F;O事件，如时钟中断、控制台中断等。外设中断是异步产生的，与处理器的执行无关。</p>
-<h5 id="异常-exception"><a href="#异常-exception" class="headerlink" title="异常 exception"></a>异常 exception</h5><p>在处理器执行指令期间检测到不正常的或非法的内部事件（如 x86 平台上的除零错、地址访问越界）。操作系统再去处理异常，进而发生执行环境切换。</p>
-<h5 id="陷入-Trap"><a href="#陷入-Trap" class="headerlink" title="陷入 Trap"></a>陷入 Trap</h5><p>是指程序执行过程中由于需要通过系统调用请求操作系统服务而有意引发的事件。</p>
-<p>课本是从操作系统的角度来给出的中断 (Interrupt) 、陷入 (Trap) 和异常（Exception）的定义。在其他角度或者书籍中对它们的定义可能会有不同。</p>
-<h3 id="进程-Process"><a href="#进程-Process" class="headerlink" title="进程  Process"></a>进程  Process</h3><p>给个图就行了。</p>
-<p><img src="/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/context-switch.png" alt="../_images/context-switch.png"></p>
-<h3 id="地址空间-Address-Space"><a href="#地址空间-Address-Space" class="headerlink" title="地址空间 Address Space"></a>地址空间 Address Space</h3><p><strong>地址空间</strong> (Address Space) 是对物理内存的虚拟化和抽象，也称虚存 (Virtual Memory)</p>
-<p>处理器中的内存管理单元（MMU，Memory Management Unit）对物理内存进行映射，得到虚拟内存，这种存储空间可能超过物理内存容量，是由连续地址编址的，无法被其他应用程序破坏（私有的）。</p>
-<p>“这种存储空间可能超过物理内存容量”的一部分原理是页面交换（不常用的页面放在硬盘上）、共享库和代码段等。</p>
-<p><img src="/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/address-space.png" alt="../_images/address-space.png"></p>
-<h3 id="文件-File"><a href="#文件-File" class="headerlink" title="文件 File"></a>文件 File</h3><p><strong>文件</strong> (File) 主要用于对持久存储的抽象，并进一步扩展到为外设的抽象。</p>
-<p>各种外设有很大区别，但通过“文件”这一抽象概念，可以以统一的文件操作（基本的读写）来访问各种外设。</p>
-<p>以磁盘为代表的持久存储介质的数据访问单位是一个扇区或一个块，而在内存中的数据访问单位是一个字节或一个字。这就需要操作系统通过文件来屏蔽磁盘与内存差异，尽量以内存的读写方式来处理持久存储的数据。</p>
-
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
