@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。 如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。 链接脚本基本概念由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="链接脚本(linker scripts)">
+<meta property="og:url" content="http://example.com/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/index.html">
+<meta property="og:site_name" content="Rrrfish">
+<meta property="og:description" content="linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。 如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。 链接脚本基本概念由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫in">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-11-15T06:31:14.000Z">
+<meta property="article:modified_time" content="2023-11-16T10:16:38.912Z">
+<meta property="article:author" content="Rrrfish">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>链接脚本(linker scripts) | Rrrfish</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Rrrfish</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Rrrfish's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Astronaut.jpg">
+      <meta itemprop="name" content="Rrrfish">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rrrfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          链接脚本(linker scripts)
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-11-15 14:31:14" itemprop="dateCreated datePublished" datetime="2023-11-15T14:31:14+08:00">2023-11-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-11-16 18:16:38" itemprop="dateModified" datetime="2023-11-16T18:16:38+08:00">2023-11-16</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。</p>
+<p>如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。</p>
+<h2 id="链接脚本基本概念"><a href="#链接脚本基本概念" class="headerlink" title="链接脚本基本概念"></a>链接脚本基本概念</h2><p>由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫<strong>input sections</strong>，输出文件的sections叫<strong>output sections</strong>。</p>
+<p>可执行文件的section都拥有自己的名字和大小，大多数sections还会有相应的数据，叫作section contents。</p>
+<p>段可以是<strong>loadable</strong>和<strong>allocatable</strong>的。其中，loadable指在输出文件被执行的时候该段的内容会被加载进内存。<strong>allocatable</strong>指的是没有内容的section，它们对应的区域会在内存中预留位置，但是没有东西会被加载到那里（甚至在有些时候，这部分内存会被直接清掉）。既不是loadable又不是allocatable的段一般情况下会包含一些debugging信息。</p>
+<p>loadable output sections或者allocatable output sections拥有两个地址：<strong>VMA</strong>和<strong>LMA</strong>。</p>
+<p><strong>VMA</strong>（virtual memory address）：output file在执行的时候，section会得到VMA地址。</p>
+<p><strong>LMA</strong>（load memory address）：section在被加载的时候会得到这个地址。</p>
+<p>大多数情况下这两种地址都是相同的，有一种情况二者会有差异：当一部分数据段被加载进ROM，并且在程序运行之际它被拷贝进RAM时，ROM地址会成为LMA，RAM地址会成为VMA。</p>
+<p>每个目标文件都有<strong>symbol table</strong>（包含一系列symbols)。symbol分为<strong>defined symbol</strong>和<strong>undefined symbol</strong>。每一个symbol都有名字，defined symbol还拥有地址。编译C或者C++程序得到目标文件后，每一个defined function、global variable 和 static variable都会拥有defined symbol，而输入文件中引用的undefined function或者global variable会成为undefined symbol。</p>
+<h2 id="链接脚本格式"><a href="#链接脚本格式" class="headerlink" title="链接脚本格式"></a>链接脚本格式</h2><p>链接脚本是文本文件，由一系列指令构成。每一个指令都是一个关键字，可能会附有参数或者对symbol的赋值。分号作为指令的间隔符，空格会被忽略。</p>
+<p>链接脚本里的字符串，如文件或者格式名（format names），可以被直接输入（不加引号）。但是如果文件名里面包括逗号之类的符号，那么还需要用双引号将字符串括起来。文件名里面是不可能包括双引号的。</p>
+<p>注释用&#x2F;**&#x2F;</p>
+<h2 id="一些简单例子"><a href="#一些简单例子" class="headerlink" title="一些简单例子"></a>一些简单例子</h2><p>最简单的链接脚本只有一个指令：’SECTIONS’。’SECTIONS’指令可以用来描述内存在输出文件中的布局。</p>
+<p>这个例子里我们假设你的程序只有代码，初始化数据和未初始化数据。它们将会被分别放在’.text’、’.data’、’.bss’段。我们再假设你的输入文件只有这些sections。</p>
+<p>加入code应该被加载在0x10000地址位，data在0x8000000位置开始。链接脚本如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">	. = 0x10000;</span><br><span class="line">	.text :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.text)</span><br><span class="line">	&#125;</span><br><span class="line">	. = 0x8000000;</span><br><span class="line">	.data :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.data)</span><br><span class="line">	&#125;</span><br><span class="line">	.bss :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.bss)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>‘.’这个特殊symbol是位置计数器（location counter）。如果不用某种方式（后面会讲）特殊指明output section的地址，那么地址就会被设置为位置计数器的当前值。位置计数器按照output section大小来增长。在’SECTIONS’指令的开始位置，位置计数器是’0’。</p>
+<p>第二行定义了output section ‘.text’。冒号是必备语法，现在可以暂时忽略。output section name后的花括号里面列举了需要放进output section的input sections的名字。表达式 “*(.text) “表示所有输入文件中的所有”.text “输入部分。</p>
+<p>由于定义输出部分 <code>.text&#39; 时位置计数器为 </code>0x10000’，链接器将把输出文件中 <code>.text&#39; 部分的地址设置为 </code>0x10000’。</p>
+<p>剩下的几行定义了输出文件的’.data’和’.bss’ sections。链接器将会在’0x8000000’放置’.data’output section。在连接器放置 ‘.data’ output section之后，location counter会被设置为’0x8000000’加上’.data’ output section的大小。然后链接器将会在 ‘.data’ output section 的后面立刻填上’.bss’ output section。</p>
+<p>链接器将确保每个输出部分的对齐方式符合要求，必要时会增加位置计数器。在这个例子里，’.text’ 和 ‘.data’ sections 的指定地址可能会满足任何对齐限制，但链接器可能必须在 ‘.data’ 和 ‘.bss’部分之间创建一个小间隙。</p>
+<h2 id="简单的链接脚本指定"><a href="#简单的链接脚本指定" class="headerlink" title="简单的链接脚本指定"></a>简单的链接脚本指定</h2><p><strong>Entry Point</strong>：设置进入点。</p>
+<p><strong>File Commands</strong>：处理文件的指令。 </p>
+<p><strong>Fomat Commands</strong>：处理目标文件格式的指令。</p>
+<p><strong>Miscellaneous Commands</strong>：其他的链接脚本指令。</p>
+<h3 id="Setting-the-entry-point"><a href="#Setting-the-entry-point" class="headerlink" title="Setting the entry point"></a>Setting the entry point</h3><p>执行程序的第一条指令叫作entry point。你可以使用ENTRY链接脚本指令来设置entry point。</p>
+<p>参数是一个symbol name： ENTRY(symbol)</p>
+<p>设置entry point有几种方法，链接器将会通过依次尝试以下方法来设置entry point，并且在其中一种方法成功后停止。</p>
+<ul>
+<li>‘-e’ 输入命令行选项</li>
+<li>链接脚本里的ENTRY(symbol)命令</li>
+<li><em>start</em> symbol 的值（如果已经定义了）</li>
+<li>‘.text’ section的第一个字节的地址（如果存在的话）</li>
+<li>0地址</li>
+</ul>
+<h3 id="Commands-dealing-with-files"><a href="#Commands-dealing-with-files" class="headerlink" title="Commands dealing with files"></a>Commands dealing with files</h3><p>有以下几种</p>
+<p><strong>INCLUDE <em>filename</em></strong>：</p>
+<p>在此加入链接脚本的文件名。这个文件会在当前目录和使用 -L 选项指定的任何目录中搜索。对INCLUDE的嵌套调用最多10层。</p>
+<p>*<em>INPUT(<em>file, file, …</em>)</em>*</p>
+<p>**INPUT(<em>file file …</em>)**：</p>
+<p>INPUT指令会指示连接器将命名的文件包含在link中，就像它们在命令行中被命名一样。比如说，如果你想在任何链接的时候都将’subr.o’给链接上，但是你又不想每次都在链接命令行里都加上这个文件名字，那你就可以在链接脚本里使用’INPUT(subr.o)’。你还可以在链接脚本里列出所有的input files，然后调用linker的时候再加上个’-T’选项。连接器会先尝试打开当前目录下的文件，如果没找到会在归档库里找。</p>
+<p>*<em>GROUP(<em>file, file, …</em>)</em>*</p>
+<p>**GROUP(<em>file file …</em>)**：</p>
+<p>GROUP命令和INPUT有点像，但是GROUP命令里的所有文件都要是已归档的</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/" rel="prev" title="操作系统 | 软硬件中的特权级机制">
+      <i class="fa fa-chevron-left"></i> 操作系统 | 软硬件中的特权级机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/01/25/Rust-%E8%B0%83%E7%94%A8%E5%90%8C%E5%90%8D%E6%96%B9%E6%B3%95/" rel="next" title="Rust 调用同名方法">
+      Rust 调用同名方法 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">1.</span> <span class="nav-text">链接脚本基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC%E6%A0%BC%E5%BC%8F"><span class="nav-number">2.</span> <span class="nav-text">链接脚本格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E7%AE%80%E5%8D%95%E4%BE%8B%E5%AD%90"><span class="nav-number">3.</span> <span class="nav-text">一些简单例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E5%8D%95%E7%9A%84%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC%E6%8C%87%E5%AE%9A"><span class="nav-number">4.</span> <span class="nav-text">简单的链接脚本指定</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Setting-the-entry-point"><span class="nav-number">4.1.</span> <span class="nav-text">Setting the entry point</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Commands-dealing-with-files"><span class="nav-number">4.2.</span> <span class="nav-text">Commands dealing with files</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rrrfish"
+      src="/images/Astronaut.jpg">
+  <p class="site-author-name" itemprop="name">Rrrfish</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-laugh-wink"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rrrfish</span>
+</div>
+  <div class="powered-by">
+    
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

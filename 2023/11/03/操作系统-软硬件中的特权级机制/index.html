@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="学习第二章的批处理操作系统，为了避免我们的操作系统软件被应用程序影响，我们需要将二者进行隔离，提供一种特权级机制，让应用程序和操作系统内核的指令处于不同的特权级。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统 | 软硬件中的特权级机制">
+<meta property="og:url" content="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/index.html">
+<meta property="og:site_name" content="Rrrfish">
+<meta property="og:description" content="学习第二章的批处理操作系统，为了避免我们的操作系统软件被应用程序影响，我们需要将二者进行隔离，提供一种特权级机制，让应用程序和操作系统内核的指令处于不同的特权级。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/PrivilegeStack.png">
+<meta property="og:image" content="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/EnvironmentCallFlow.png">
+<meta property="article:published_time" content="2023-11-03T08:46:27.000Z">
+<meta property="article:modified_time" content="2023-11-04T17:47:13.836Z">
+<meta property="article:author" content="Rrrfish">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="RISC-V">
+<meta property="article:tag" content="特权级">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/PrivilegeStack.png">
+
+<link rel="canonical" href="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>操作系统 | 软硬件中的特权级机制 | Rrrfish</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Rrrfish</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Rrrfish's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Astronaut.jpg">
+      <meta itemprop="name" content="Rrrfish">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rrrfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          操作系统 | 软硬件中的特权级机制
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-11-03 16:46:27" itemprop="dateCreated datePublished" datetime="2023-11-03T16:46:27+08:00">2023-11-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-11-05 01:47:13" itemprop="dateModified" datetime="2023-11-05T01:47:13+08:00">2023-11-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/" itemprop="url" rel="index"><span itemprop="name">self-learning-recording</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">开源操作系统训练营笔记</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>学习第二章的批处理操作系统，为了避免我们的操作系统软件被应用程序影响，我们需要将二者进行隔离，提供一种特权级机制，让应用程序和操作系统内核的指令处于不同的特权级。</p>
+<span id="more"></span>
+
+<p>将应用程序隔离的途径主要有两个，</p>
+<ol>
+<li>应用程序不能访问任意的地址空间。</li>
+<li>应用程序不能执行某些可能会破坏计算机系统的指令。</li>
+</ol>
+<p>本节主要讲述第二种方式。</p>
+<p>我们将那些可能会破坏计算机系统的内核态特权级指令子集规定出来，并且明确限制该指令子集只能在内核态特权级的执行环境中执行。如果用户态执行环境想要执行它们，会被CPU检查到，产生异常。</p>
+<p>如果应用程序采用传统的函数调用（call和ret指令或者指令组合）来获得错做系统的函数服务，将会直接绕过硬件的特权级检查。所以我们要设置新的机器指令：执行环境调用（Execution Environment Call，简称ecall）和执行环境返回（Execution Environment Return， 简称eret），以此来让操作系统检查应用的操作是否会破坏计算机系统。</p>
+<ul>
+<li><strong>ecall</strong>: 具有用户态到内核态的执行环境切换能力的函数调用系统</li>
+<li><strong>eret</strong>:  具有内核态到用户态的执行环境切花能力的函数返回指令。</li>
+</ul>
+<p>调用ecall时，操作系统会检查应用的程序参数，确保不会造成操作系统的破坏。调用eret时，操作系统会在执行eret之前准备和回复用户态执行应用系统的上下文。</p>
+<h2 id="RISC-V特权级架构"><a href="#RISC-V特权级架构" class="headerlink" title="RISC-V特权级架构"></a>RISC-V特权级架构</h2><h4 id="RISC-V的4种特权级"><a href="#RISC-V的4种特权级" class="headerlink" title="RISC-V的4种特权级"></a>RISC-V的4种特权级</h4><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>编码</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>00</td>
+<td>用户&#x2F;应用模式 (U, User&#x2F;Application)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>01</td>
+<td>监督模式 (S, Supervisor)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>10</td>
+<td>虚拟监督模式 (H, Hypervisor)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11</td>
+<td>机器模式 (M, Machine)</td>
+</tr>
+</tbody></table>
+<p>在CPU硬件层面，除了M模式必须存在外，其它模式可以不存在。</p>
+<p><img src="/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/PrivilegeStack.png" alt="../_images/PrivilegeStack.png"></p>
+<p>白色块是执行环境，黑色块是ABI。其中操作系统运行在S模式上。运行在M模式上的软件被成为监督模式执行环境(SEE, Supervisor Execution Environment)。</p>
+<p>bootloader-RustSBI是运行在M模式特权级的软件，是操作系统内核的执行环境。</p>
+<p><strong>异常控制流</strong> （简称<strong>异常</strong>）：是RISC-V预警下的Trap种类之一，它发生在上层软件需要用到执行环境中提供的功能，此时需要从上层软件的控制流跳转到执行环境的控制流中，由于上层软件和执行环境处于不同的特权级中，所以这种切换往往会伴随着CPU的特权级切换。</p>
+<p>这种异常的发生总体有两种原因：</p>
+<ol>
+<li>用户态软件为了获得内核态操作系统的服务功能而执行特殊指令。</li>
+<li>执行某条指令期间发生了错误（比如执行力用户态不允许执行的指令或者其他错误）并且被CPU检查到。</li>
+</ol>
+<h4 id="RISC-V-异常一览表"><a href="#RISC-V-异常一览表" class="headerlink" title="RISC-V 异常一览表"></a>RISC-V 异常一览表</h4><table>
+<thead>
+<tr>
+<th>Interrupt</th>
+<th>Exception Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>Instruction address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>Instruction access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>2</td>
+<td>Illegal instruction</td>
+</tr>
+<tr>
+<td>0</td>
+<td>3</td>
+<td>Breakpoint</td>
+</tr>
+<tr>
+<td>0</td>
+<td>4</td>
+<td>Load address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>5</td>
+<td>Load access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>6</td>
+<td>Store&#x2F;AMO address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>7</td>
+<td>Store&#x2F;AMO access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>8</td>
+<td>Environment call from U-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>9</td>
+<td>Environment call from S-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>11</td>
+<td>Environment call from M-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>12</td>
+<td>Instruction page fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>13</td>
+<td>Load page fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>15</td>
+<td>Store&#x2F;AMO page fault</td>
+</tr>
+</tbody></table>
+<p>其中<strong>断点</strong>（Breakpoint）和<strong>执行环境调用</strong>（Environment call）这两种异常会被称为<strong>陷入</strong>或者Trap类指令。执行ebreak会触发断点陷入一场，执行二call会随着CPU切换的不同特权级而触发不同的异常（如表中8&#x2F;9&#x2F;11行）</p>
+<p>M 模式软件 SEE 和 S 模式的内核之间的接口被称为 <strong>监督模式二进制接口</strong> (Supervisor Binary Interface, SBI)，而内核和 U 模式的应用程序之间的接口被称为 <strong>应用程序二进制接口</strong> (Application Binary Interface, ABI)，也叫<strong>系统调用</strong> (syscall, System Call) 。</p>
+<p><img src="/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/EnvironmentCallFlow.png" alt="../_images/EnvironmentCallFlow.png"></p>
+<p>表中其他的异常一般是执行指令时发生了某种错误，或者该指令是高特权级指令，或者该指令访问了不该访问的高特权级资源。此时就需要将控制转交给高特权级的软件处理，异常恢复后将回到上层软件；如果没有成功处理异常，高特权级软件有权杀死和清楚第特权级软件，避免破坏整个执行环境。</p>
+<h2 id="RISC-V的特权指令"><a href="#RISC-V的特权指令" class="headerlink" title="RISC-V的特权指令"></a>RISC-V的特权指令</h2><p>与特权级无关的一般的指令和通用寄存器 <code>x0</code> ~ <code>x31</code> 在任何特权级都可以执行。而每个特权级都对应一些特殊指令和 <strong>控制状态寄存器</strong> (CSR, Control and Status Register) ，来控制该特权级的某些行为并描述其状态。</p>
+<p>在 RISC-V 中，会有两类属于高特权级 S 模式的特权指令：</p>
+<ul>
+<li>指令本身属于高特权级的指令，如 <code>sret</code> 指令（表示从 S 模式返回到 U 模式）。</li>
+<li>指令访问了 <a target="_blank" rel="noopener" href="https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter2/4trap-handling.html#term-s-mod-csr">S模式特权级下才能访问的寄存器</a> 或内存，如表示S模式系统状态的 <strong>控制状态寄存器</strong> <code>sstatus</code> 等。</li>
+</ul>
+<h4 id="RISC-V-S模式特权指令"><a href="#RISC-V-S模式特权指令" class="headerlink" title="RISC-V S模式特权指令"></a>RISC-V S模式特权指令</h4><table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sret</td>
+<td>从 S 模式返回 U 模式：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>wfi</td>
+<td>处理器在空闲时进入低功耗状态等待中断：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>sfence.vma</td>
+<td>刷新 TLB 缓存：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>访问 S 模式 CSR 的指令</td>
+<td>通过访问sepc&#x2F;stvec&#x2F;scause&#x2F;sscartch&#x2F;stval&#x2F;sstatus&#x2F;satp等CSR来改变系统状态：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+</tbody></table>
+<h2 id="RISC-V特权级切换"><a href="#RISC-V特权级切换" class="headerlink" title="RISC-V特权级切换"></a>RISC-V特权级切换</h2><h3 id="特权级切换相关的控制状态寄存器"><a href="#特权级切换相关的控制状态寄存器" class="headerlink" title="特权级切换相关的控制状态寄存器"></a>特权级切换相关的控制状态寄存器</h3><p>对于RISC-V架构的Trap机制，我们需要注意：</p>
+<ol>
+<li>在出发Trap之前CPU原型在哪个特权级。</li>
+<li>CPU需要切换到哪个特权级来处理该Trap，并且在处理完成之后返回原特权级。</li>
+</ol>
+<p>RISC-V架构中，关于Trap有一条重要规则：Trap前的特权级不会高于Trap后的特权级。因此如果触发Trap之后切换到S特权级，说明Trap发生之前CPU只能运行在S&#x2F;U特权级。（无论从哪个特权级出发）只要是Trap到S特权级，操作系统就会使用S特权级中与Trap相关的<strong>控制状态寄存器</strong>（<strong>CSR</strong>，Control and Status Register) 来辅助Trap处理。</p>
+<h4 id="进入-S-特权级-Trap-的相关-CSR"><a href="#进入-S-特权级-Trap-的相关-CSR" class="headerlink" title="进入 S 特权级 Trap 的相关 CSR"></a>进入 S 特权级 Trap 的相关 CSR</h4><table>
+<thead>
+<tr>
+<th>CSR 名</th>
+<th>该 CSR 与 Trap 相关的功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sstatus</td>
+<td><code>SPP</code> 等字段给出 Trap 发生之前 CPU 处在哪个特权级（S&#x2F;U）等信息</td>
+</tr>
+<tr>
+<td>sepc</td>
+<td>当 Trap 是一个异常的时候，记录 Trap 发生之前执行的最后一条指令的地址</td>
+</tr>
+<tr>
+<td>scause</td>
+<td>描述 Trap 的原因</td>
+</tr>
+<tr>
+<td>stval</td>
+<td>给出 Trap 附加信息</td>
+</tr>
+<tr>
+<td>stvec</td>
+<td>控制 Trap 处理代码的入口地址</td>
+</tr>
+</tbody></table>
+<h2 id="特权级切换的硬件控制机制"><a href="#特权级切换的硬件控制机制" class="headerlink" title="特权级切换的硬件控制机制"></a>特权级切换的硬件控制机制</h2>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/RISC-V/" rel="tag"># RISC-V</a>
+              <a href="/tags/%E7%89%B9%E6%9D%83%E7%BA%A7/" rel="tag"># 特权级</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/10/31/Rust-Macros-%E5%AE%8F%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9A%84%E7%90%86%E8%A7%A3/" rel="prev" title="Rust Macros | 宏官方文档的理解">
+      <i class="fa fa-chevron-left"></i> Rust Macros | 宏官方文档的理解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/" rel="next" title="链接脚本(linker scripts)">
+      链接脚本(linker scripts) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#RISC-V%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">RISC-V特权级架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RISC-V%E7%9A%844%E7%A7%8D%E7%89%B9%E6%9D%83%E7%BA%A7"><span class="nav-number">1.0.1.</span> <span class="nav-text">RISC-V的4种特权级</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RISC-V-%E5%BC%82%E5%B8%B8%E4%B8%80%E8%A7%88%E8%A1%A8"><span class="nav-number">1.0.2.</span> <span class="nav-text">RISC-V 异常一览表</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RISC-V%E7%9A%84%E7%89%B9%E6%9D%83%E6%8C%87%E4%BB%A4"><span class="nav-number">2.</span> <span class="nav-text">RISC-V的特权指令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RISC-V-S%E6%A8%A1%E5%BC%8F%E7%89%B9%E6%9D%83%E6%8C%87%E4%BB%A4"><span class="nav-number">2.0.1.</span> <span class="nav-text">RISC-V S模式特权指令</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RISC-V%E7%89%B9%E6%9D%83%E7%BA%A7%E5%88%87%E6%8D%A2"><span class="nav-number">3.</span> <span class="nav-text">RISC-V特权级切换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%88%87%E6%8D%A2%E7%9B%B8%E5%85%B3%E7%9A%84%E6%8E%A7%E5%88%B6%E7%8A%B6%E6%80%81%E5%AF%84%E5%AD%98%E5%99%A8"><span class="nav-number">3.1.</span> <span class="nav-text">特权级切换相关的控制状态寄存器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E5%85%A5-S-%E7%89%B9%E6%9D%83%E7%BA%A7-Trap-%E7%9A%84%E7%9B%B8%E5%85%B3-CSR"><span class="nav-number">3.1.1.</span> <span class="nav-text">进入 S 特权级 Trap 的相关 CSR</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%89%B9%E6%9D%83%E7%BA%A7%E5%88%87%E6%8D%A2%E7%9A%84%E7%A1%AC%E4%BB%B6%E6%8E%A7%E5%88%B6%E6%9C%BA%E5%88%B6"><span class="nav-number">4.</span> <span class="nav-text">特权级切换的硬件控制机制</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rrrfish"
+      src="/images/Astronaut.jpg">
+  <p class="site-author-name" itemprop="name">Rrrfish</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">9</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-laugh-wink"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rrrfish</span>
+</div>
+  <div class="powered-by">
+    
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>HELLO!</title>
+    <url>/2023/10/19/HELLO/</url>
+    <content><![CDATA[<p>·你好，这里是一名软件工程大二的学生，平时会发一些学习的记录与心得</p>
+]]></content>
+      <tags>
+        <tag>introduction</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>API与ABI</title>
+    <url>/2023/10/29/API%E4%B8%8EABI/</url>
+    <content><![CDATA[<p>ABI(Application Binary Interface)与API(Application Programming Interface)</p>
+<p>二者都是规定的协议，只不过维度不同。API是编程级的概念，ABI是二进制级的概念。前者包括编程中的函数、网络请求等，后者规定了诸如底层上函数的调用规则、变量的存储方式、堆栈的分布方式等等。</p>
+<span id="more"></span>
+
+<p>API相同时ABI可能也不兼容，像是C语言在不同机器上调用，之前编译得到的二进制码的ABI不符合现在机器的ABI，所以需要重新编译。又比如说，两份C语言写成的代码文件，分别用不同的编译器进行编译，能够将他们链接在一起吗？这就取决于两个编译器的ABI是否相同，换言之就是以下内容是否遵守：采用同样的目标文件格式、拥有同样的符号修饰标准、变量的内存分布方式相同、函数的调用方式相同等等。</p>
+<p>以下课本原文：</p>
+<p><em>应用程序二进制接口 ABI 是不同二进制代码片段的连接纽带。ABI 定义了二进制机器代码级别的规则，主要包括基本数据类型、通用寄存器的使用、参数的传递规则、以及堆栈的使用等等。ABI 与处理器和内存地址等硬件架构相关，是用来约束链接器 (Linker) 和汇编器 (Assembler) 的。在同一处理器下，基于不同高级语言编写的应用程序、库和操作系统，如果遵循同样的 ABI 定义，那么它们就能正确链接和执行。</em></p>
+<p><em>应用程序编程接口 API 是不同源代码片段的连接纽带。API 定义了一个源码级（如 C 语言）函数的参数，参数的类型，函数的返回值等。因此 API 是用来约束编译器 (Compiler) 的：一个 API 是给编译器的一些指令，它规定了源代码可以做以及不可以做哪些事。API 与编程语言相关，如 libc 是基于 C 语言编写的标准库，那么基于 C 的应用程序就可以通过编译器建立与 libc 的联系，并能在运行中正确访问 libc 中的函数。</em></p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>开源操作系统训练营笔记</category>
+      </categories>
+      <tags>
+        <tag>OS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RISCV和MIPS的汇编指令的区别</title>
+    <url>/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<p>RISC-V和MIPS在汇编指令方面存在一定的区别。</p>
+<span id="more"></span>
+
+<h3 id="在指令类型方面"><a href="#在指令类型方面" class="headerlink" title="在指令类型方面"></a>在指令类型方面</h3><h4 id="RISCV分为R-type、I-type、J-type和S-type等"><a href="#RISCV分为R-type、I-type、J-type和S-type等" class="headerlink" title="RISCV分为R-type、I-type、J-type和S-type等"></a>RISCV分为R-type、I-type、J-type和S-type等</h4><p>R-type(add etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/R-type-format.png"></p>
+<p>I-type(addi、beq、ld etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020191816122.png" alt="image-20231020191816122"></p>
+<p>S-type(sd etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020192654393.png" alt="image-20231020192654393"></p>
+<h4 id="MIPS分为R-type、I-type、J-type（只有这三种）"><a href="#MIPS分为R-type、I-type、J-type（只有这三种）" class="headerlink" title="MIPS分为R-type、I-type、J-type（只有这三种）"></a>MIPS分为R-type、I-type、J-type（只有这三种）</h4><p>R-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L20wXzU3NDQ2Mjg0,size_16,color_FFFFFF,t_70.png" alt="img"></p>
+<p>I-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
+<p>J-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515172043999.png" alt="img"></p>
+<p>MIPS是没有S-type的！store word指令属于I-type。</p>
+<h3 id="指令格式-instruction-format-和汇编指令中寄存器的相对位置"><a href="#指令格式-instruction-format-和汇编指令中寄存器的相对位置" class="headerlink" title="指令格式(instruction format)和汇编指令中寄存器的相对位置"></a>指令格式(instruction format)和汇编指令中寄存器的相对位置</h3><p>RISCV的机器码format的寄存器相对位置和汇编指令的相对位置是相同的，比如：R-type中，指令格式为先目标寄存器(rs1、rs2)后源寄存器(rd)，和汇编的顺序相同</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add x9, x20, x21</span><br></pre></td></tr></table></figure>
+
+<p>代表着将x21和x20内的数据相加存进x9中，这段汇编指令的对应字段值是</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194223559.png" alt="image-20231020194223559"></p>
+<p>MIPS却是不同的，比如：R-type中，指令格式为先源寄存器(rs、rt)后目标寄存器(rd)，和汇编的顺序相反（但是两个源寄存器的相对位置是相同的，都是先rs再rt）。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add $s0, $s1, $s2 #s1存17、s2存18、s0存16</span><br></pre></td></tr></table></figure>
+
+<p>这段汇编指令的对应字段值是</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194443779.png" alt="image-20231020194443779"></p>
+<h5 id="RISCV对于立即数指令的推断能力"><a href="#RISCV对于立即数指令的推断能力" class="headerlink" title="RISCV对于立即数指令的推断能力"></a>RISCV对于立即数指令的推断能力</h5><p>在RISC-V中，当处理常数时，程序员无需明确使用“addi”指令；相反，他们可以简单地写“add”，汇编器将根据操作数是全部寄存器（R型）还是其中一个是常数（I型），生成适当的操作码和指令格式。在RISC-V中对不同操作码和格式使用明确的名称旨在在引入汇编语言时相对于机器语言减少混淆。</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020200008385.png" alt="image-20231020200008385"></p>
+<p>MIPS是否有这种功能不太清楚，实际上RISCV的这种能力在互联网上也查不到。</p>
+<h3 id="immediate的格式"><a href="#immediate的格式" class="headerlink" title="immediate的格式"></a>immediate的格式</h3><p>MIPS的instruction format中立即数是一体的、不分离的。</p>
+<p>而RISCV中I-type的立即数被截断为两部分，5 bits和7bits，5bits靠近op，7 bits在尾部。这种设计是为了让所有类型的指令中funct3的位置相同（便于硬件的设计）。</p>
+<p>计算这两段fields时，可以将立即数除2^5，商为5 bits部分，余数为7 bits部分。</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>CS61C</category>
+      </categories>
+      <tags>
+        <tag>RISC-V</tag>
+        <tag>MIPS</tag>
+        <tag>计算机组成原理</tag>
+        <tag>汇编</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Rust Macros | 宏官方文档的理解</title>
+    <url>/2023/10/31/Rust-Macros-%E5%AE%8F%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9A%84%E7%90%86%E8%A7%A3/</url>
+    <content><![CDATA[<h1 id="宏和函数的区别"><a href="#宏和函数的区别" class="headerlink" title="宏和函数的区别"></a>宏和函数的区别</h1><p>宏属于元编程（metaprogramming)。</p>
+<p>宏可以接受不同数量的参数；宏还可以再一个给定类型上实现trait，函数却不可以：trait需要在编译时实现，而函数却时在运行时被调用，宏就没有这种问题，它在编译器翻译代码之前就会展开。</p>
+<p>调用宏之前必须定义它，或者将其引入作用域（用use关键词）。</p>
+<p>宏有个问题就是定义十分复杂，难以阅读、理解和维护。</p>
+<h1 id="Macros-By-Example"><a href="#Macros-By-Example" class="headerlink" title="Macros By Example"></a>Macros By Example</h1><h2 id="syntax"><a href="#syntax" class="headerlink" title="syntax"></a>syntax</h2><p>这种宏定义方式通过使用示例来让编译器知道生成相应的代码。</p>
+<span id="more"></span>
+
+<h3 id="MacroRulesDefinition"><a href="#MacroRulesDefinition" class="headerlink" title="MacroRulesDefinition"></a>MacroRulesDefinition</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span></span><br></pre></td></tr></table></figure>
+
+<p>用这个关键字来定义宏。</p>
+<h3 id="MacroRulesDef"><a href="#MacroRulesDef" class="headerlink" title="MacroRulesDef"></a>MacroRulesDef</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroRules );</span><br><span class="line">|	[ MacroRules ];</span><br><span class="line">|	&#123; MacroRules &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRules"><a href="#MacroRules" class="headerlink" title="MacroRules"></a>MacroRules</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">MacroRule</span>(; MacroRule)* ;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRule"><a href="#MacroRule" class="headerlink" title="MacroRule"></a>MacroRule</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">MacroMatcher =&gt; MacroTranscriber</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroMatcher"><a href="#MacroMatcher" class="headerlink" title="MacroMatcher"></a>MacroMatcher</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroMatch* )</span><br><span class="line">|	[ MacroMatch* ]</span><br><span class="line">|	&#123; MacroMatch* &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroMatch"><a href="#MacroMatch" class="headerlink" title="MacroMatch"></a>MacroMatch</h3><p>$和delimiters之外的所有token</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">| MacroMatcher</span><br><span class="line">| $( <span class="title function_ invoke__">IDENTIFIER_OR_KERYWORD</span>(不包括<span class="keyword">crate</span>) | RAW_IDENTIFIER | _ ): MacroFragSpec</span><br><span class="line">| $( MacroMatch+ ) MacroRepSep? MacroRepOp</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroFragSpec"><a href="#MacroFragSpec" class="headerlink" title="MacroFragSpec"></a>MacroFragSpec</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	block | expr | ident | item | lifetime | literal </span><br><span class="line">|	meta | pat | pat_param | path |stmt | tt | ty | vis</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRepSep"><a href="#MacroRepSep" class="headerlink" title="MacroRepSep"></a>MacroRepSep</h3><p>delimiters和MacroRepOp以外的所有token</p>
+<h3 id="MacroRepOp"><a href="#MacroRepOp" class="headerlink" title="MacroRepOp"></a>MacroRepOp</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">* | + | ?</span><br></pre></td></tr></table></figure>
+
+
+
+<p>每个宏都有一个名字，有一至多条rule。</p>
+<p>每个Rule都分为两个部分<strong>matcher</strong>和<strong>transcriber</strong>:</p>
+<p>matcher用来描述他将要匹配的部分的格式，transcriber用来描述成功匹配后将会如何替换原文本。matcher和transcriber都必须被delimiters包裹。</p>
+<p>宏可以扩展至表达式、语句、items（项，包括traits、impls、foreign items）、类型或模式。</p>
+<h2 id="Transcribing"><a href="#Transcribing" class="headerlink" title="Transcribing"></a>Transcribing</h2><p>在这里官方文档举了个例子，看了半天才明白。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
+
+<p>这里为什么会error呢？</p>
+<p>实际上，当一个宏被调用的时候，macro expander会根据名字查找对应宏，然后按照顺序依次尝试匹配macro rule，他会尝试填入第一个成功的匹配，宏的匹配过程是没有lookahead的，所以有时候会造成歧义。如果编译器出现没有明确决定如何parse tokens的时刻，会立即报错。如果遇到error，后面的匹配也不会看了。</p>
+<p>就比如上面那个例子，error被填入$($i:ident)*后，再遇到$j:ident，编译器会一时不知道如何parse，它没有lookahead功能，所以就报错了。把最后一句替换成</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!(error error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
+
+<p>也会照样报错。</p>
+<p>但如果换成下面的代码则可以通过编译。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); </span><br></pre></td></tr></table></figure>
+
+<p>说明这种歧义编译器无法检查到，只能在运行时发现。</p>
+<p>还有一点就是，$在宏中的作用是出发宏引擎（macros engine）的特殊行为，没有被$指定的token会被字面（literally）匹配并转录（transcribe），例如</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* <span class="number">1</span>) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error <span class="number">1</span>]; <span class="comment">//这里1换成其他东西就会报错</span></span><br></pre></td></tr></table></figure>
+
+<p>例外的是，最外层的delimiters可以匹配成任何的delimiters。比如</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ([$($i:ident)*]) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![[error]]; </span><br><span class="line">ambiguity!([error]); </span><br></pre></td></tr></table></figure>
+
+<p>对ambiguity!的两次调用都是合法的，但是下面这个调用会报错。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!((error)); <span class="comment">//Error</span></span><br></pre></td></tr></table></figure>
+
+<p>这样也可以</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error]; <span class="comment">//OK!</span></span><br><span class="line">ambiguity!(error); <span class="comment">//OK!</span></span><br></pre></td></tr></table></figure>
+
+<p>还有一件事，$不能被匹配或者被转录，”$$”是不合法的。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($$:ident)*) =&gt; &#123; &#125;; <span class="comment">// Error!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="Forwarding-a-matched-fragment-传递匹配片段"><a href="#Forwarding-a-matched-fragment-传递匹配片段" class="headerlink" title="Forwarding a matched fragment 传递匹配片段"></a>Forwarding a matched fragment 传递匹配片段</h2><p>当将一个匹配到的片段传递给macro-by-example时，第二个宏里的matchers将会视传进来的片段为不透明语法树（opaque AST），而不是直接将把传进来的片段字面匹配，只能使用相同类型的指定符。听起来好难懂（有我翻译的问题，但我一开始看原文也理解得挺费劲），看个例子就能理解了。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:expr) =&gt; &#123; bar!($l); &#125;</span><br><span class="line"><span class="comment">// ERROR:               ^^ no rules expected this token in macro call</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<p>上面这个示例中，如果是“直接将把传进来的片段字面匹配”，那么foo!(3)传进去3，foo!内部调用bar!时传进去3，就可以通过编译了。但是实际上不是这样的，他不管你传进去的符不符合bar!的内部定义，只要foo!里的$l的指定符类型不符合bar!的指定符类型，就会报错。</p>
+<p>这样修改就能通过编译</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="comment">// compiles OK</span></span><br><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:tt) =&gt; &#123; bar!($l); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<p>因为标记树tt允许在匹配后直接匹配文字标记3。</p>
+<p>不想写了，剩下的以后再写吧。</p>
+]]></content>
+      <categories>
+        <category>Rust语法</category>
+      </categories>
+      <tags>
+        <tag>Rust</tag>
+        <tag>Macros</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>String和Int在memory中的储存</title>
+    <url>/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/</url>
+    <content><![CDATA[<p>CS61C的disc3中有一个关于String和Int在内存中储存区别的问题</p>
+<span id="more"></span>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">2</span>];</span><br><span class="line"><span class="comment">//storing &#x27;DEAD&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">0x44454144</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//storing &#x27;BEEF&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">0x42454546</span>;</span><br></pre></td></tr></table></figure>
+
+<p>问题是Does this C program store ‘DEADBEEF’ in memory the same way as storing it as a string?</p>
+<p>答案表明了，计算机在储存String的时候，无论是大端还是小端，String的最左端的字符都会储存在lowest address；</p>
+<p>然而integers的储存方式取决于系统架构，如果是大端模式，将会比较符合人类直觉地按照’DEADBEEF’储存。而如果是小端模式，将会把最低有效字节储存在低地址部分，就像是，0x44 0x41 0x45 0x44。</p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>CS61C</category>
+      </categories>
+      <tags>
+        <tag>计算机组成原理</tag>
+        <tag>C</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Rust 调用同名方法</title>
+    <url>/2024/01/25/Rust-%E8%B0%83%E7%94%A8%E5%90%8C%E5%90%8D%E6%96%B9%E6%B3%95/</url>
+    <content><![CDATA[<ul>
+<li>Rust中调用同名方法会优先调用类型中的方法，其次再尝试调用trait方法。</li>
+</ul>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">Java</span>;</span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">Rust</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title class_">Say</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">say</span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">born</span>();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">trait</span> <span class="title class_">Compile</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">compile</span>(&amp;<span class="keyword">self</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Say</span> <span class="keyword">for</span> <span class="title class_">Java</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">say</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;I&#x27;m Java!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">born</span>() &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;I&#x27;m bron in 1995.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Say</span> <span class="keyword">for</span> <span class="title class_">Rust</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">say</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;I&#x27;m Rust!&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">born</span>() &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;I&#x27;m born in 2012&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">impl</span> <span class="title class_">Compile</span> <span class="keyword">for</span> <span class="title class_">Rust</span> &#123;</span><br><span class="line">    <span class="keyword">fn</span> <span class="title function_">compile</span>(&amp;<span class="keyword">self</span>) &#123;</span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">&quot;compiling...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>若调用同名<strong>方法</strong>（参数列表含有self），则调用格式如下：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> <span class="variable">java</span> = Java;</span><br><span class="line"><span class="keyword">let</span> <span class="variable">rust</span> = Rust;</span><br><span class="line"></span><br><span class="line">Say::<span class="title function_ invoke__">say</span>(&amp;java); <span class="comment">//也可以java.say()</span></span><br><span class="line">Say::<span class="title function_ invoke__">say</span>(&amp;rust); <span class="comment">//也可以rust.say()</span></span><br><span class="line">Compile::<span class="title function_ invoke__">compile</span>(&amp;rust) <span class="comment">//也可以rust.compile()</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>​		因为参数列表中有self，所以编译器可以根据填入的变量类型来决定具体调用哪种方法。</p>
+<ul>
+<li><p>若调用同名关联函数（参数列表无self），则调用格式如下：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">&lt;Java <span class="keyword">as</span> Say&gt;::<span class="title function_ invoke__">born</span>(); </span><br><span class="line">&lt;Rust <span class="keyword">as</span> Say&gt;::<span class="title function_ invoke__">born</span>();</span><br><span class="line"><span class="comment">//完全限定语法</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+]]></content>
+      <tags>
+        <tag>Rust</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>操作系统 | 软硬件中的特权级机制</title>
+    <url>/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<p>学习第二章的批处理操作系统，为了避免我们的操作系统软件被应用程序影响，我们需要将二者进行隔离，提供一种特权级机制，让应用程序和操作系统内核的指令处于不同的特权级。</p>
+<span id="more"></span>
+
+<p>将应用程序隔离的途径主要有两个，</p>
+<ol>
+<li>应用程序不能访问任意的地址空间。</li>
+<li>应用程序不能执行某些可能会破坏计算机系统的指令。</li>
+</ol>
+<p>本节主要讲述第二种方式。</p>
+<p>我们将那些可能会破坏计算机系统的内核态特权级指令子集规定出来，并且明确限制该指令子集只能在内核态特权级的执行环境中执行。如果用户态执行环境想要执行它们，会被CPU检查到，产生异常。</p>
+<p>如果应用程序采用传统的函数调用（call和ret指令或者指令组合）来获得错做系统的函数服务，将会直接绕过硬件的特权级检查。所以我们要设置新的机器指令：执行环境调用（Execution Environment Call，简称ecall）和执行环境返回（Execution Environment Return， 简称eret），以此来让操作系统检查应用的操作是否会破坏计算机系统。</p>
+<ul>
+<li><strong>ecall</strong>: 具有用户态到内核态的执行环境切换能力的函数调用系统</li>
+<li><strong>eret</strong>:  具有内核态到用户态的执行环境切花能力的函数返回指令。</li>
+</ul>
+<p>调用ecall时，操作系统会检查应用的程序参数，确保不会造成操作系统的破坏。调用eret时，操作系统会在执行eret之前准备和回复用户态执行应用系统的上下文。</p>
+<h2 id="RISC-V特权级架构"><a href="#RISC-V特权级架构" class="headerlink" title="RISC-V特权级架构"></a>RISC-V特权级架构</h2><h4 id="RISC-V的4种特权级"><a href="#RISC-V的4种特权级" class="headerlink" title="RISC-V的4种特权级"></a>RISC-V的4种特权级</h4><table>
+<thead>
+<tr>
+<th>级别</th>
+<th>编码</th>
+<th>名称</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>00</td>
+<td>用户&#x2F;应用模式 (U, User&#x2F;Application)</td>
+</tr>
+<tr>
+<td>1</td>
+<td>01</td>
+<td>监督模式 (S, Supervisor)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>10</td>
+<td>虚拟监督模式 (H, Hypervisor)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>11</td>
+<td>机器模式 (M, Machine)</td>
+</tr>
+</tbody></table>
+<p>在CPU硬件层面，除了M模式必须存在外，其它模式可以不存在。</p>
+<p><img src="/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/PrivilegeStack.png" alt="../_images/PrivilegeStack.png"></p>
+<p>白色块是执行环境，黑色块是ABI。其中操作系统运行在S模式上。运行在M模式上的软件被成为监督模式执行环境(SEE, Supervisor Execution Environment)。</p>
+<p>bootloader-RustSBI是运行在M模式特权级的软件，是操作系统内核的执行环境。</p>
+<p><strong>异常控制流</strong> （简称<strong>异常</strong>）：是RISC-V预警下的Trap种类之一，它发生在上层软件需要用到执行环境中提供的功能，此时需要从上层软件的控制流跳转到执行环境的控制流中，由于上层软件和执行环境处于不同的特权级中，所以这种切换往往会伴随着CPU的特权级切换。</p>
+<p>这种异常的发生总体有两种原因：</p>
+<ol>
+<li>用户态软件为了获得内核态操作系统的服务功能而执行特殊指令。</li>
+<li>执行某条指令期间发生了错误（比如执行力用户态不允许执行的指令或者其他错误）并且被CPU检查到。</li>
+</ol>
+<h4 id="RISC-V-异常一览表"><a href="#RISC-V-异常一览表" class="headerlink" title="RISC-V 异常一览表"></a>RISC-V 异常一览表</h4><table>
+<thead>
+<tr>
+<th>Interrupt</th>
+<th>Exception Code</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>Instruction address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>Instruction access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>2</td>
+<td>Illegal instruction</td>
+</tr>
+<tr>
+<td>0</td>
+<td>3</td>
+<td>Breakpoint</td>
+</tr>
+<tr>
+<td>0</td>
+<td>4</td>
+<td>Load address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>5</td>
+<td>Load access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>6</td>
+<td>Store&#x2F;AMO address misaligned</td>
+</tr>
+<tr>
+<td>0</td>
+<td>7</td>
+<td>Store&#x2F;AMO access fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>8</td>
+<td>Environment call from U-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>9</td>
+<td>Environment call from S-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>11</td>
+<td>Environment call from M-mode</td>
+</tr>
+<tr>
+<td>0</td>
+<td>12</td>
+<td>Instruction page fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>13</td>
+<td>Load page fault</td>
+</tr>
+<tr>
+<td>0</td>
+<td>15</td>
+<td>Store&#x2F;AMO page fault</td>
+</tr>
+</tbody></table>
+<p>其中<strong>断点</strong>（Breakpoint）和<strong>执行环境调用</strong>（Environment call）这两种异常会被称为<strong>陷入</strong>或者Trap类指令。执行ebreak会触发断点陷入一场，执行二call会随着CPU切换的不同特权级而触发不同的异常（如表中8&#x2F;9&#x2F;11行）</p>
+<p>M 模式软件 SEE 和 S 模式的内核之间的接口被称为 <strong>监督模式二进制接口</strong> (Supervisor Binary Interface, SBI)，而内核和 U 模式的应用程序之间的接口被称为 <strong>应用程序二进制接口</strong> (Application Binary Interface, ABI)，也叫<strong>系统调用</strong> (syscall, System Call) 。</p>
+<p><img src="/2023/11/03/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F-%E8%BD%AF%E7%A1%AC%E4%BB%B6%E4%B8%AD%E7%9A%84%E7%89%B9%E6%9D%83%E7%BA%A7%E6%9C%BA%E5%88%B6/EnvironmentCallFlow.png" alt="../_images/EnvironmentCallFlow.png"></p>
+<p>表中其他的异常一般是执行指令时发生了某种错误，或者该指令是高特权级指令，或者该指令访问了不该访问的高特权级资源。此时就需要将控制转交给高特权级的软件处理，异常恢复后将回到上层软件；如果没有成功处理异常，高特权级软件有权杀死和清楚第特权级软件，避免破坏整个执行环境。</p>
+<h2 id="RISC-V的特权指令"><a href="#RISC-V的特权指令" class="headerlink" title="RISC-V的特权指令"></a>RISC-V的特权指令</h2><p>与特权级无关的一般的指令和通用寄存器 <code>x0</code> ~ <code>x31</code> 在任何特权级都可以执行。而每个特权级都对应一些特殊指令和 <strong>控制状态寄存器</strong> (CSR, Control and Status Register) ，来控制该特权级的某些行为并描述其状态。</p>
+<p>在 RISC-V 中，会有两类属于高特权级 S 模式的特权指令：</p>
+<ul>
+<li>指令本身属于高特权级的指令，如 <code>sret</code> 指令（表示从 S 模式返回到 U 模式）。</li>
+<li>指令访问了 <a href="https://rcore-os.cn/rCore-Tutorial-Book-v3/chapter2/4trap-handling.html#term-s-mod-csr">S模式特权级下才能访问的寄存器</a> 或内存，如表示S模式系统状态的 <strong>控制状态寄存器</strong> <code>sstatus</code> 等。</li>
+</ul>
+<h4 id="RISC-V-S模式特权指令"><a href="#RISC-V-S模式特权指令" class="headerlink" title="RISC-V S模式特权指令"></a>RISC-V S模式特权指令</h4><table>
+<thead>
+<tr>
+<th>指令</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sret</td>
+<td>从 S 模式返回 U 模式：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>wfi</td>
+<td>处理器在空闲时进入低功耗状态等待中断：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>sfence.vma</td>
+<td>刷新 TLB 缓存：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+<tr>
+<td>访问 S 模式 CSR 的指令</td>
+<td>通过访问sepc&#x2F;stvec&#x2F;scause&#x2F;sscartch&#x2F;stval&#x2F;sstatus&#x2F;satp等CSR来改变系统状态：在 U 模式下执行会产生非法指令异常</td>
+</tr>
+</tbody></table>
+<h2 id="RISC-V特权级切换"><a href="#RISC-V特权级切换" class="headerlink" title="RISC-V特权级切换"></a>RISC-V特权级切换</h2><h3 id="特权级切换相关的控制状态寄存器"><a href="#特权级切换相关的控制状态寄存器" class="headerlink" title="特权级切换相关的控制状态寄存器"></a>特权级切换相关的控制状态寄存器</h3><p>对于RISC-V架构的Trap机制，我们需要注意：</p>
+<ol>
+<li>在出发Trap之前CPU原型在哪个特权级。</li>
+<li>CPU需要切换到哪个特权级来处理该Trap，并且在处理完成之后返回原特权级。</li>
+</ol>
+<p>RISC-V架构中，关于Trap有一条重要规则：Trap前的特权级不会高于Trap后的特权级。因此如果触发Trap之后切换到S特权级，说明Trap发生之前CPU只能运行在S&#x2F;U特权级。（无论从哪个特权级出发）只要是Trap到S特权级，操作系统就会使用S特权级中与Trap相关的<strong>控制状态寄存器</strong>（<strong>CSR</strong>，Control and Status Register) 来辅助Trap处理。</p>
+<h4 id="进入-S-特权级-Trap-的相关-CSR"><a href="#进入-S-特权级-Trap-的相关-CSR" class="headerlink" title="进入 S 特权级 Trap 的相关 CSR"></a>进入 S 特权级 Trap 的相关 CSR</h4><table>
+<thead>
+<tr>
+<th>CSR 名</th>
+<th>该 CSR 与 Trap 相关的功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>sstatus</td>
+<td><code>SPP</code> 等字段给出 Trap 发生之前 CPU 处在哪个特权级（S&#x2F;U）等信息</td>
+</tr>
+<tr>
+<td>sepc</td>
+<td>当 Trap 是一个异常的时候，记录 Trap 发生之前执行的最后一条指令的地址</td>
+</tr>
+<tr>
+<td>scause</td>
+<td>描述 Trap 的原因</td>
+</tr>
+<tr>
+<td>stval</td>
+<td>给出 Trap 附加信息</td>
+</tr>
+<tr>
+<td>stvec</td>
+<td>控制 Trap 处理代码的入口地址</td>
+</tr>
+</tbody></table>
+<h2 id="特权级切换的硬件控制机制"><a href="#特权级切换的硬件控制机制" class="headerlink" title="特权级切换的硬件控制机制"></a>特权级切换的硬件控制机制</h2>]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>开源操作系统训练营笔记</category>
+      </categories>
+      <tags>
+        <tag>OS</tag>
+        <tag>RISC-V</tag>
+        <tag>特权级</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>操作系统抽象</title>
+    <url>/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/</url>
+    <content><![CDATA[<p>本文内容包括执行环境、控制流、进程和文件。</p>
+<span id="more"></span>
+
+<h3 id="执行环境-Execution-Environment"><a href="#执行环境-Execution-Environment" class="headerlink" title="执行环境  Execution Environment"></a>执行环境  Execution Environment</h3><p>它负责给在其上运行的软件提供享用的功能和资源。比如：对于Java虚拟机来说，它的执行环境就是操作系统内核；对于（直接运行在裸机硬件上的）操作系统，它的执行环境是计算机硬件；在云计算时代，传统计算机操作系统和硬件之间多了一层Hypervisor&#x2F;VMM，操作系统内核的执行环境就变成了Hypervisor&#x2F;VMM。</p>
+<p>CPU在执行过程中，可以在不同层次的执行环境之间切换，这称为 <strong>执行环境切换</strong> 。</p>
+<p>在最后，课本给出了应用程序执行环境的一个基本的定义：</p>
+<p><em>执行环境是应用程序正确运行所需的服务与管理环境，用来完成应用程序在运行时的数据与资源管理、应用程序的生存期等方面的处理，它定义了应用程序有权访问的其他数据或资源，并决定了应用程序的行为限制范围。</em></p>
+<h3 id="控制流-Control-Flow"><a href="#控制流-Control-Flow" class="headerlink" title="控制流 Control Flow"></a>控制流 Control Flow</h3><h4 id="普通控制流"><a href="#普通控制流" class="headerlink" title="普通控制流"></a>普通控制流</h4><p>我的理解是，一个应用程序一串要执行的序列，比如一行行的源代码、一条条的汇编指令。</p>
+<p>在应用程序的眼里，它只能接触他所在的执行环境，不会跳转到其他执行环境（实际上在cpu眼里会发生跳转，只是应用程序“看不见”），所以应用程序执行基本上是以普通控制流的形式完成整个运行过程。</p>
+<h4 id="异常控制流"><a href="#异常控制流" class="headerlink" title="异常控制流"></a>异常控制流</h4><p>我的理解为，它相对于普通控制流，更是一种处理器角度上的概念，处理器在执行应用程序的时候，很可能会碰到一些意外情况，比如系统调用请求、外设终端、CPU异常等，这个时候处理器就要执行与之前应用程序不相干的指令，处理器执行的前一条指令和后一条指令将会位于两个完全不同的位置，即不同的执行环境 。这种控制流的突变叫做执行环境切换，我们把这种突变的控制流称你为异常控制流。</p>
+<h4 id="控制流上下文（执行环境的状态）"><a href="#控制流上下文（执行环境的状态）" class="headerlink" title="控制流上下文（执行环境的状态）"></a>控制流上下文（执行环境的状态）</h4><p>控制流在执行完某指令时的物理资源内容，即确保下一时刻能继续 <em>正确</em> 执行控制流指令的物理资源内容称为控制流的 <strong>上下文</strong> (Context) ，也可称为控制流所在执行环境的状态。</p>
+<p>这里强调正确是因为，控制流执行过程中，可能会发生一些控制流上下文发生变化的情况，比如寄存器或者内存某块需要的数据被改变了，会导致之后的执行结果出现问题（不符合预期），这叫做<strong>程序执行错误</strong>。</p>
+<p>为了避免这种情况，操作系统需要保护控制流上下文。</p>
+<h4 id="异常控制流的分类"><a href="#异常控制流的分类" class="headerlink" title="异常控制流的分类"></a>异常控制流的分类</h4><h5 id="中断-Interrupt"><a href="#中断-Interrupt" class="headerlink" title="中断 Interrupt"></a>中断 Interrupt</h5><p>外设 <strong>中断</strong> 是指由外部设备引起的外部I&#x2F;O事件，如时钟中断、控制台中断等。外设中断是异步产生的，与处理器的执行无关。</p>
+<h5 id="异常-exception"><a href="#异常-exception" class="headerlink" title="异常 exception"></a>异常 exception</h5><p>在处理器执行指令期间检测到不正常的或非法的内部事件（如 x86 平台上的除零错、地址访问越界）。操作系统再去处理异常，进而发生执行环境切换。</p>
+<h5 id="陷入-Trap"><a href="#陷入-Trap" class="headerlink" title="陷入 Trap"></a>陷入 Trap</h5><p>是指程序执行过程中由于需要通过系统调用请求操作系统服务而有意引发的事件。</p>
+<p>课本是从操作系统的角度来给出的中断 (Interrupt) 、陷入 (Trap) 和异常（Exception）的定义。在其他角度或者书籍中对它们的定义可能会有不同。</p>
+<h3 id="进程-Process"><a href="#进程-Process" class="headerlink" title="进程  Process"></a>进程  Process</h3><p>给个图就行了。</p>
+<p><img src="/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/context-switch.png" alt="../_images/context-switch.png"></p>
+<h3 id="地址空间-Address-Space"><a href="#地址空间-Address-Space" class="headerlink" title="地址空间 Address Space"></a>地址空间 Address Space</h3><p><strong>地址空间</strong> (Address Space) 是对物理内存的虚拟化和抽象，也称虚存 (Virtual Memory)</p>
+<p>处理器中的内存管理单元（MMU，Memory Management Unit）对物理内存进行映射，得到虚拟内存，这种存储空间可能超过物理内存容量，是由连续地址编址的，无法被其他应用程序破坏（私有的）。</p>
+<p>“这种存储空间可能超过物理内存容量”的一部分原理是页面交换（不常用的页面放在硬盘上）、共享库和代码段等。</p>
+<p><img src="/2023/10/29/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%8A%BD%E8%B1%A1/address-space.png" alt="../_images/address-space.png"></p>
+<h3 id="文件-File"><a href="#文件-File" class="headerlink" title="文件 File"></a>文件 File</h3><p><strong>文件</strong> (File) 主要用于对持久存储的抽象，并进一步扩展到为外设的抽象。</p>
+<p>各种外设有很大区别，但通过“文件”这一抽象概念，可以以统一的文件操作（基本的读写）来访问各种外设。</p>
+<p>以磁盘为代表的持久存储介质的数据访问单位是一个扇区或一个块，而在内存中的数据访问单位是一个字节或一个字。这就需要操作系统通过文件来屏蔽磁盘与内存差异，尽量以内存的读写方式来处理持久存储的数据。</p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>开源操作系统训练营笔记</category>
+      </categories>
+      <tags>
+        <tag>OS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>链接脚本(linker scripts)</title>
+    <url>/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/</url>
+    <content><![CDATA[<p>linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。</p>
+<p>如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。</p>
+<h2 id="链接脚本基本概念"><a href="#链接脚本基本概念" class="headerlink" title="链接脚本基本概念"></a>链接脚本基本概念</h2><p>由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫<strong>input sections</strong>，输出文件的sections叫<strong>output sections</strong>。</p>
+<p>可执行文件的section都拥有自己的名字和大小，大多数sections还会有相应的数据，叫作section contents。</p>
+<p>段可以是<strong>loadable</strong>和<strong>allocatable</strong>的。其中，loadable指在输出文件被执行的时候该段的内容会被加载进内存。<strong>allocatable</strong>指的是没有内容的section，它们对应的区域会在内存中预留位置，但是没有东西会被加载到那里（甚至在有些时候，这部分内存会被直接清掉）。既不是loadable又不是allocatable的段一般情况下会包含一些debugging信息。</p>
+<p>loadable output sections或者allocatable output sections拥有两个地址：<strong>VMA</strong>和<strong>LMA</strong>。</p>
+<p><strong>VMA</strong>（virtual memory address）：output file在执行的时候，section会得到VMA地址。</p>
+<p><strong>LMA</strong>（load memory address）：section在被加载的时候会得到这个地址。</p>
+<p>大多数情况下这两种地址都是相同的，有一种情况二者会有差异：当一部分数据段被加载进ROM，并且在程序运行之际它被拷贝进RAM时，ROM地址会成为LMA，RAM地址会成为VMA。</p>
+<p>每个目标文件都有<strong>symbol table</strong>（包含一系列symbols)。symbol分为<strong>defined symbol</strong>和<strong>undefined symbol</strong>。每一个symbol都有名字，defined symbol还拥有地址。编译C或者C++程序得到目标文件后，每一个defined function、global variable 和 static variable都会拥有defined symbol，而输入文件中引用的undefined function或者global variable会成为undefined symbol。</p>
+<h2 id="链接脚本格式"><a href="#链接脚本格式" class="headerlink" title="链接脚本格式"></a>链接脚本格式</h2><p>链接脚本是文本文件，由一系列指令构成。每一个指令都是一个关键字，可能会附有参数或者对symbol的赋值。分号作为指令的间隔符，空格会被忽略。</p>
+<p>链接脚本里的字符串，如文件或者格式名（format names），可以被直接输入（不加引号）。但是如果文件名里面包括逗号之类的符号，那么还需要用双引号将字符串括起来。文件名里面是不可能包括双引号的。</p>
+<p>注释用&#x2F;**&#x2F;</p>
+<h2 id="一些简单例子"><a href="#一些简单例子" class="headerlink" title="一些简单例子"></a>一些简单例子</h2><p>最简单的链接脚本只有一个指令：’SECTIONS’。’SECTIONS’指令可以用来描述内存在输出文件中的布局。</p>
+<p>这个例子里我们假设你的程序只有代码，初始化数据和未初始化数据。它们将会被分别放在’.text’、’.data’、’.bss’段。我们再假设你的输入文件只有这些sections。</p>
+<p>加入code应该被加载在0x10000地址位，data在0x8000000位置开始。链接脚本如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">	. = 0x10000;</span><br><span class="line">	.text :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.text)</span><br><span class="line">	&#125;</span><br><span class="line">	. = 0x8000000;</span><br><span class="line">	.data :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.data)</span><br><span class="line">	&#125;</span><br><span class="line">	.bss :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.bss)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>‘.’这个特殊symbol是位置计数器（location counter）。如果不用某种方式（后面会讲）特殊指明output section的地址，那么地址就会被设置为位置计数器的当前值。位置计数器按照output section大小来增长。在’SECTIONS’指令的开始位置，位置计数器是’0’。</p>
+<p>第二行定义了output section ‘.text’。冒号是必备语法，现在可以暂时忽略。output section name后的花括号里面列举了需要放进output section的input sections的名字。表达式 “*(.text) “表示所有输入文件中的所有”.text “输入部分。</p>
+<p>由于定义输出部分 <code>.text&#39; 时位置计数器为 </code>0x10000’，链接器将把输出文件中 <code>.text&#39; 部分的地址设置为 </code>0x10000’。</p>
+<p>剩下的几行定义了输出文件的’.data’和’.bss’ sections。链接器将会在’0x8000000’放置’.data’output section。在连接器放置 ‘.data’ output section之后，location counter会被设置为’0x8000000’加上’.data’ output section的大小。然后链接器将会在 ‘.data’ output section 的后面立刻填上’.bss’ output section。</p>
+<p>链接器将确保每个输出部分的对齐方式符合要求，必要时会增加位置计数器。在这个例子里，’.text’ 和 ‘.data’ sections 的指定地址可能会满足任何对齐限制，但链接器可能必须在 ‘.data’ 和 ‘.bss’部分之间创建一个小间隙。</p>
+<h2 id="简单的链接脚本指定"><a href="#简单的链接脚本指定" class="headerlink" title="简单的链接脚本指定"></a>简单的链接脚本指定</h2><p><strong>Entry Point</strong>：设置进入点。</p>
+<p><strong>File Commands</strong>：处理文件的指令。 </p>
+<p><strong>Fomat Commands</strong>：处理目标文件格式的指令。</p>
+<p><strong>Miscellaneous Commands</strong>：其他的链接脚本指令。</p>
+<h3 id="Setting-the-entry-point"><a href="#Setting-the-entry-point" class="headerlink" title="Setting the entry point"></a>Setting the entry point</h3><p>执行程序的第一条指令叫作entry point。你可以使用ENTRY链接脚本指令来设置entry point。</p>
+<p>参数是一个symbol name： ENTRY(symbol)</p>
+<p>设置entry point有几种方法，链接器将会通过依次尝试以下方法来设置entry point，并且在其中一种方法成功后停止。</p>
+<ul>
+<li>‘-e’ 输入命令行选项</li>
+<li>链接脚本里的ENTRY(symbol)命令</li>
+<li><em>start</em> symbol 的值（如果已经定义了）</li>
+<li>‘.text’ section的第一个字节的地址（如果存在的话）</li>
+<li>0地址</li>
+</ul>
+<h3 id="Commands-dealing-with-files"><a href="#Commands-dealing-with-files" class="headerlink" title="Commands dealing with files"></a>Commands dealing with files</h3><p>有以下几种</p>
+<p><strong>INCLUDE <em>filename</em></strong>：</p>
+<p>在此加入链接脚本的文件名。这个文件会在当前目录和使用 -L 选项指定的任何目录中搜索。对INCLUDE的嵌套调用最多10层。</p>
+<p>*<em>INPUT(<em>file, file, …</em>)</em>*</p>
+<p>**INPUT(<em>file file …</em>)**：</p>
+<p>INPUT指令会指示连接器将命名的文件包含在link中，就像它们在命令行中被命名一样。比如说，如果你想在任何链接的时候都将’subr.o’给链接上，但是你又不想每次都在链接命令行里都加上这个文件名字，那你就可以在链接脚本里使用’INPUT(subr.o)’。你还可以在链接脚本里列出所有的input files，然后调用linker的时候再加上个’-T’选项。连接器会先尝试打开当前目录下的文件，如果没找到会在归档库里找。</p>
+<p>*<em>GROUP(<em>file, file, …</em>)</em>*</p>
+<p>**GROUP(<em>file file …</em>)**：</p>
+<p>GROUP命令和INPUT有点像，但是GROUP命令里的所有文件都要是已归档的</p>
+]]></content>
+  </entry>
+</search>
