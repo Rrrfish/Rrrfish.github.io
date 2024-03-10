@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="尝试了一下在x86_64平台移除标准库依赖，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在x86_64平台上移除标准库依赖">
+<meta property="og:url" content="http://example.com/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/index.html">
+<meta property="og:site_name" content="Rrrfish">
+<meta property="og:description" content="尝试了一下在x86_64平台移除标准库依赖，">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-10T13:30:31.000Z">
+<meta property="article:modified_time" content="2024-03-10T13:43:35.046Z">
+<meta property="article:author" content="Rrrfish">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="x86">
+<meta property="article:tag" content="移除标准库依赖">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>在x86_64平台上移除标准库依赖 | Rrrfish</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Rrrfish</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Rrrfish's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Astronaut.jpg">
+      <meta itemprop="name" content="Rrrfish">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rrrfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          在x86_64平台上移除标准库依赖
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-03-10 21:30:31 / 修改时间：21:43:35" itemprop="dateCreated datePublished" datetime="2024-03-10T21:30:31+08:00">2024-03-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/" itemprop="url" rel="index"><span itemprop="name">self-learning-recording</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">开源操作系统训练营笔记</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>尝试了一下在x86_64平台移除标准库依赖，<span id="more"></span>如果只是单纯地将config文件中的target修改为”x86_64-unknown-linux-gnu”将会有以下报错信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">error: language item required, but not found: `eh_personality`</span><br><span class="line">  |</span><br><span class="line">  = note: this can occur when a binary crate with `#![no_std]` is compiled for a target where `eh_personality` is defined in the standard library</span><br><span class="line">  = help: you may be able to compile for a target that doesn&#x27;t need `eh_personality`, specify a target with `--target` or in `.cargo/config`</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to previous error</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="eh-personality"><a href="#eh-personality" class="headerlink" title="eh_personality"></a>eh_personality</h1><p>报错信息中的eh_personality是一种lang item，它在stack unwinding过程中标记了一种函数。首先我们要知道什么是lang item。lang item(language item)是编译器内部需要的一种特殊函数和类型，比如说’Copy’ trait，它会告诉编译器哪些类型有复制语义（Copy semantics）。在应用中，#[lang &#x3D; “copy”]就定义了copy是一种lang item。</p>
+<h2 id="Exception-Handling"><a href="#Exception-Handling" class="headerlink" title="Exception Handling"></a>Exception Handling</h2><p>Exception Handling主要分为两个阶段，search phase和cleanup phase。在这两个阶段unwinder会利用当前处理模块（这里指的是OS模块，也就是可执行文件或者动态库）来对帧栈进行从头至尾的扫描。而对于每一个帧栈，unwinder会利用”personality routine”(它的地址存放在unwind section中)<br>然后了解eh_personality的作用，在rust库中解释为stack unwinding过程中的一个lang item，这里插入一下exception handling的过程：</p>
+<h3 id="search-phase"><a href="#search-phase" class="headerlink" title="search phase"></a>search phase</h3><p>“personality routine”会检查被抛出的异常，决定是否在此帧栈catch该异常。</p>
+<h3 id="cleanup-phase"><a href="#cleanup-phase" class="headerlink" title="cleanup phase"></a>cleanup phase</h3><p>unwinder会再次调用各个personality routine，在这个阶段personality routine的作用是决定是否要运行cleanup code。如果运行，unwinder控制权会转交给函数体内部的特殊分支–”landing pad”，它会调用析构函数、释放内存,etc。最后控制权回到unwinder，unwinder继续之前的工作。</p>
+<p>eh_persionality就是上面所说的personality routine。综上我们知道，报错信息中显示”not found ‘eh_personality’”，是因为eh_personality需要操作系统特定的lib，而我们正在从头编写OS，意味着我们将要避免使用任何OS提供的服务或库。这里我们采取的方案是不进行unwind。</p>
+<p>在Cargo.toml中加入以下内容，就可以将panic的应对方式改为abort。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[profile.dev]</span><br><span class="line">panic = &quot;abort&quot;</span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = &quot;abort&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Linker-error"><a href="#Linker-error" class="headerlink" title="Linker error"></a>Linker error</h1><p>但修改后又会遇到报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">error: linking with `cc` failed: exit status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start&#x27;:</span><br><span class="line">          (.text+0x16): undefined reference to `__libc_csu_fini&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x1d): undefined reference to `__libc_csu_init&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x24): undefined reference to `main&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x2a): undefined reference to `__libc_start_main&#x27;</span><br><span class="line">          collect2: error: ld returned 1 exit status</span><br><span class="line">          </span><br><span class="line">  = note: some `extern` functions couldn&#x27;t be found; some native libraries may need to be installed or have their path specified</span><br><span class="line">  = note: use the `-l` flag to specify native libraries to link</span><br><span class="line">  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to 1 previous error</span><br></pre></td></tr></table></figure>
+
+
+
+<p>以上报错信息显示出现了<strong>linker error</strong>，linker的作用是将generated code链接为可执行文件，而各类操作系统的链接方法都不尽相同，所以linker和linker error也会随着操作系统不同发生差异。</p>
+<p>再仔细看报错信息，在函数**’_start’**中我们缺少启动文件。这里我查阅资料后粗略了解了一下_start和C运行时(C runtime)之间的关系。</p>
+<h2 id="start和C运行时-C-runtime"><a href="#start和C运行时-C-runtime" class="headerlink" title="_start和C运行时(C runtime)"></a>_start和C运行时(C runtime)</h2><p>start是比main()更接近底层的程序入口点，被操作系统直接调用。start被调用后需要进行各种预初始化操作，比如设置堆栈、初始化全局变量、准备命令行参数和环境变量、执行各类初始化函数等等。_start完成自己的任务之后，CRT开始执行各类其他的初始化，最终调用main函数。main函数执行结束后，控制权重新移交给CRT，CRT开始清理工作，如调用全局和静态对象的析构函数，关闭标准输入输出等，并最终调用系统调用结束程序。</p>
+<p>我们可以在命令行中加入-nostartfiles来告诉linker不执行C start routine。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo rustc -- -C link-arg=-nostartfiles</span><br></pre></td></tr></table></figure>
+
+
+<p>当然，更方便地，我们可以在.cargo&#x2F;config.toml文件中加入下列内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">// /os/.cargo/config.toml</span><br><span class="line"></span><br><span class="line">[target.&#x27;cfg(target_os = &quot;linux&quot;)&#x27;]</span><br><span class="line">rustflags = [&quot;-C&quot;, &quot;link-arg=-nostartfiles&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>最终成功通过编译。</p>
+<p>代码及配置如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/main.rs</span></span><br><span class="line"><span class="meta">#![no_std]</span></span><br><span class="line"><span class="meta">#![no_main]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">mod</span> lang.items;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span> <span class="comment">// don&#x27;t mangle the name of this function</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">_start</span>() <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="comment">// this function is the entry point, since the linker looks for a function</span></span><br><span class="line">    <span class="comment">// named `_start` by default</span></span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/lang.items.rs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#[panic_handler]</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">panic</span>(_info: &amp;PanicInfo) <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/Cargo.toml:</span></span><br><span class="line"><span class="comment">//添加</span></span><br><span class="line">[profile.dev]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/.cargo/config.toml</span></span><br><span class="line">[build]</span><br><span class="line">target = <span class="string">&quot;x86_64-unknown-linux-gnu&quot;</span></span><br><span class="line"></span><br><span class="line">[target.<span class="symbol">&#x27;cfg</span>(target_os = <span class="string">&quot;linux&quot;</span>)&#x27;]</span><br><span class="line">rustflags = [<span class="string">&quot;-C&quot;</span>, <span class="string">&quot;link-arg=-nostartfiles&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/x86/" rel="tag"># x86</a>
+              <a href="/tags/%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/" rel="tag"># 移除标准库依赖</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/01/25/Rust%20%E5%88%87%E7%89%87%E4%B8%8E%E5%8F%AF%E4%BF%AE%E6%94%B9%E5%88%87%E7%89%87/" rel="prev" title="Rust 切片与可修改切片">
+      <i class="fa fa-chevron-left"></i> Rust 切片与可修改切片
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#eh-personality"><span class="nav-number">1.</span> <span class="nav-text">eh_personality</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Exception-Handling"><span class="nav-number">1.1.</span> <span class="nav-text">Exception Handling</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#search-phase"><span class="nav-number">1.1.1.</span> <span class="nav-text">search phase</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cleanup-phase"><span class="nav-number">1.1.2.</span> <span class="nav-text">cleanup phase</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linker-error"><span class="nav-number">2.</span> <span class="nav-text">Linker error</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#start%E5%92%8CC%E8%BF%90%E8%A1%8C%E6%97%B6-C-runtime"><span class="nav-number">2.1.</span> <span class="nav-text">_start和C运行时(C runtime)</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rrrfish"
+      src="/images/Astronaut.jpg">
+  <p class="site-author-name" itemprop="name">Rrrfish</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-laugh-wink"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rrrfish</span>
+</div>
+  <div class="powered-by">
+    
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
