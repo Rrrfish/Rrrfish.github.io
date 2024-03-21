@@ -20,21 +20,20 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="CS61C的disc3中有一个关于String和Int在内存中储存区别的问题">
+  <meta name="description" content="GNU MakeMake的用途 供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。 Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。 make支持很多语言。 make可以建包，安装卸载包，生成包的标签等等。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="String和Int在memory中的储存">
-<meta property="og:url" content="http://example.com/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/index.html">
+<meta property="og:title" content="MakeFile学习笔记">
+<meta property="og:url" content="http://example.com/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/index.html">
 <meta property="og:site_name" content="Rrrfish">
-<meta property="og:description" content="CS61C的disc3中有一个关于String和Int在内存中储存区别的问题">
+<meta property="og:description" content="GNU MakeMake的用途 供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。 Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。 make支持很多语言。 make可以建包，安装卸载包，生成包的标签等等。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2023-10-19T08:59:19.000Z">
-<meta property="article:modified_time" content="2023-10-19T12:28:28.046Z">
+<meta property="article:published_time" content="2024-03-21T06:24:00.000Z">
+<meta property="article:modified_time" content="2024-03-21T07:25:08.624Z">
 <meta property="article:author" content="Rrrfish">
-<meta property="article:tag" content="计算机组成原理">
-<meta property="article:tag" content="C">
+<meta property="article:tag" content="MakeFile">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="http://example.com/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/">
+<link rel="canonical" href="http://example.com/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
 
 
 <script id="page-configurations">
@@ -47,7 +46,7 @@
   };
 </script>
 
-  <title>String和Int在memory中的储存 | Rrrfish</title>
+  <title>MakeFile学习笔记 | Rrrfish</title>
   
 
 
@@ -191,7 +190,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/Astronaut.jpg">
@@ -204,7 +203,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          String和Int在memory中的储存
+          MakeFile学习笔记
         </h1>
 
         <div class="post-meta">
@@ -216,7 +215,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2023-10-19 16:59:19 / 修改时间：20:28:28" itemprop="dateCreated datePublished" datetime="2023-10-19T16:59:19+08:00">2023-10-19</time>
+              <time title="创建时间：2024-03-21 14:24:00 / 修改时间：15:25:08" itemprop="dateCreated datePublished" datetime="2024-03-21T14:24:00+08:00">2024-03-21</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -224,11 +223,7 @@
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/self-learning-recording/" itemprop="url" rel="index"><span itemprop="name">self-learning-recording</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/self-learning-recording/CS61C/" itemprop="url" rel="index"><span itemprop="name">CS61C</span></a>
+                  <a href="/categories/Tools/" itemprop="url" rel="index"><span itemprop="name">Tools</span></a>
                 </span>
             </span>
 
@@ -243,15 +238,30 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>CS61C的disc3中有一个关于String和Int在内存中储存区别的问题</p>
+        <h1 id="GNU-Make"><a href="#GNU-Make" class="headerlink" title="GNU Make"></a>GNU Make</h1><h2 id="Make的用途"><a href="#Make的用途" class="headerlink" title="Make的用途"></a>Make的用途</h2><ol>
+<li>供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。</li>
+<li>Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。</li>
+<li>make支持很多语言。</li>
+<li>make可以建包，安装卸载包，生成包的标签等等。</li>
+</ol>
 <span id="more"></span>
 
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">2</span>];</span><br><span class="line"><span class="comment">//storing &#x27;DEAD&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">0x44454144</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//storing &#x27;BEEF&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">0x42454546</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="TODO阅读大型项目"><a href="#TODO阅读大型项目" class="headerlink" title="TODO阅读大型项目"></a>TODO阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等。</p>
+<h2 id="Makefile的规格"><a href="#Makefile的规格" class="headerlink" title="Makefile的规格"></a>Makefile的规格</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">target ...    : prerequisites(依赖) ...</span><br><span class="line">	   recipe(命令)</span><br><span class="line">	   ...</span><br><span class="line">	   ...</span><br></pre></td></tr></table></figure>
 
-<p>问题是Does this C program store ‘DEADBEEF’ in memory the same way as storing it as a string?</p>
-<p>答案表明了，计算机在储存String的时候，无论是大端还是小端，String的最左端的字符都会储存在lowest address；</p>
-<p>然而integers的储存方式取决于系统架构，如果是大端模式，将会比较符合人类直觉地按照’DEADBEEF’储存。而如果是小端模式，将会把最低有效字节储存在低地址部分，就像是，0x44 0x41 0x45 0x44。</p>
+<p>例子：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br><span class="line">		</span><br></pre></td></tr></table></figure>
 
+<h3 id="默认目标"><a href="#默认目标" class="headerlink" title="默认目标"></a>默认目标</h3><p>在Makefile中，当执行<code>make</code>命令而不带任何参数时，<code>make</code>工具默认尝试构建第一个目标，这个目标被称为默认目标,也就是这里的<code>hello</code>。</p>
+<p><code>hello</code>依赖于<code>hello.o</code>，如果<code>hello.o</code>是最新的，那么<code>make</code>会直接执行<code>gcc -c hello hello.o</code>；如果不是，那么会寻找依赖目标。递归进行上述操作。最后自动调整命令执行的顺序再执行命令。</p>
+<p>在这里<code>clean</code>不是默认目标，必须要手动执行<code>make clean</code>时才会被调用。</p>
+<h3 id="PHONY-伪目标"><a href="#PHONY-伪目标" class="headerlink" title=".PHONY(伪目标)"></a>.PHONY(伪目标)</h3><p>如果我们的目录里存在一个名为<code>clean</code>的文件，make会认为目标<code>clean</code>已经是最新的，不需要再执行了，为了避免此情况我们需要在makefile的clean上一行加入<code>.PHONY</code>，那样<code>make</code>就会无视是否存在<code>clean</code>文件了。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"><span class="keyword">.PHONY</span>: clean</span></span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置默认目标"><a href="#设置默认目标" class="headerlink" title="设置默认目标"></a>设置默认目标</h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">.DEFALT_GOAL = clean</span><br><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
+
+<p>看例子就懂，原来的<code>hello</code>就不是默认目标了。</p>
+<h1 id="待更新"><a href="#待更新" class="headerlink" title="待更新"></a>待更新</h1>
     </div>
 
     
@@ -260,8 +270,7 @@
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"># 计算机组成原理</a>
-              <a href="/tags/C/" rel="tag"># C</a>
+              <a href="/tags/MakeFile/" rel="tag"># MakeFile</a>
           </div>
 
         
@@ -270,13 +279,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2023/10/19/HELLO/" rel="prev" title="HELLO!">
-      <i class="fa fa-chevron-left"></i> HELLO!
+    <a href="/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/" rel="prev" title="在x86_64平台上移除标准库依赖">
+      <i class="fa fa-chevron-left"></i> 在x86_64平台上移除标准库依赖
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/" rel="next" title="RISCV和MIPS的汇编指令的区别">
-      RISCV和MIPS的汇编指令的区别 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
@@ -335,6 +341,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GNU-Make"><span class="nav-number">1.</span> <span class="nav-text">GNU Make</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Make%E7%9A%84%E7%94%A8%E9%80%94"><span class="nav-number">1.1.</span> <span class="nav-text">Make的用途</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TODO%E9%98%85%E8%AF%BB%E5%A4%A7%E5%9E%8B%E9%A1%B9%E7%9B%AE"><span class="nav-number">1.2.</span> <span class="nav-text">TODO阅读大型项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile%E7%9A%84%E8%A7%84%E6%A0%BC"><span class="nav-number">1.3.</span> <span class="nav-text">Makefile的规格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-number">1.3.1.</span> <span class="nav-text">默认目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHONY-%E4%BC%AA%E7%9B%AE%E6%A0%87"><span class="nav-number">1.3.2.</span> <span class="nav-text">.PHONY(伪目标)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-number">1.3.3.</span> <span class="nav-text">设置默认目标</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%85%E6%9B%B4%E6%96%B0"><span class="nav-number">2.</span> <span class="nav-text">待更新</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
