@@ -28,7 +28,7 @@
 <meta property="og:description" content="GNU MakeMake的用途 供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。 Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。 make支持很多语言。 make可以建包，安装卸载包，生成包的标签等等。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-03-21T06:24:00.000Z">
-<meta property="article:modified_time" content="2024-03-22T12:47:49.116Z">
+<meta property="article:modified_time" content="2024-03-22T16:22:39.514Z">
 <meta property="article:author" content="Rrrfish">
 <meta property="article:tag" content="MakeFile">
 <meta name="twitter:card" content="summary">
@@ -221,7 +221,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-22 20:47:49" itemprop="dateModified" datetime="2024-03-22T20:47:49+08:00">2024-03-22</time>
+                <time title="修改时间：2024-03-23 00:22:39" itemprop="dateModified" datetime="2024-03-23T00:22:39+08:00">2024-03-23</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -252,7 +252,7 @@
 </ol>
 <span id="more"></span>
 
-<h2 id="TODO阅读大型项目"><a href="#TODO阅读大型项目" class="headerlink" title="TODO阅读大型项目"></a>TODO阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等等。</p>
+<h2 id="阅读大型项目"><a href="#阅读大型项目" class="headerlink" title="阅读大型项目"></a>阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等等。</p>
 <h2 id="Makefile的规格"><a href="#Makefile的规格" class="headerlink" title="Makefile的规格"></a>Makefile的规格</h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">target ...    : prerequisites(依赖) ...</span><br><span class="line">	   recipe(命令)</span><br><span class="line">	   ...</span><br><span class="line">	   ...</span><br></pre></td></tr></table></figure>
 
 <p>例子：</p>
@@ -350,7 +350,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GNU-Make"><span class="nav-text">GNU Make</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Make%E7%9A%84%E7%94%A8%E9%80%94"><span class="nav-text">Make的用途</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TODO%E9%98%85%E8%AF%BB%E5%A4%A7%E5%9E%8B%E9%A1%B9%E7%9B%AE"><span class="nav-text">TODO阅读大型项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile%E7%9A%84%E8%A7%84%E6%A0%BC"><span class="nav-text">Makefile的规格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-text">默认目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHONY-%E4%BC%AA%E7%9B%AE%E6%A0%87"><span class="nav-text">.PHONY(伪目标)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-text">设置默认目标</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%85%E6%9B%B4%E6%96%B0"><span class="nav-text">待更新</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GNU-Make"><span class="nav-text">GNU Make</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Make%E7%9A%84%E7%94%A8%E9%80%94"><span class="nav-text">Make的用途</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%85%E8%AF%BB%E5%A4%A7%E5%9E%8B%E9%A1%B9%E7%9B%AE"><span class="nav-text">阅读大型项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile%E7%9A%84%E8%A7%84%E6%A0%BC"><span class="nav-text">Makefile的规格</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-text">默认目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHONY-%E4%BC%AA%E7%9B%AE%E6%A0%87"><span class="nav-text">.PHONY(伪目标)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E9%BB%98%E8%AE%A4%E7%9B%AE%E6%A0%87"><span class="nav-text">设置默认目标</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BE%85%E6%9B%B4%E6%96%B0"><span class="nav-text">待更新</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -366,7 +366,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-count">15</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

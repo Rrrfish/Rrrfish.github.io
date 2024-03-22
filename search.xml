@@ -585,7 +585,7 @@
 </ol>
 <span id="more"></span>
 
-<h2 id="TODO阅读大型项目"><a href="#TODO阅读大型项目" class="headerlink" title="TODO阅读大型项目"></a>TODO阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等等。</p>
+<h2 id="阅读大型项目"><a href="#阅读大型项目" class="headerlink" title="阅读大型项目"></a>阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等等。</p>
 <h2 id="Makefile的规格"><a href="#Makefile的规格" class="headerlink" title="Makefile的规格"></a>Makefile的规格</h2><figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">target ...    : prerequisites(依赖) ...</span><br><span class="line">	   recipe(命令)</span><br><span class="line">	   ...</span><br><span class="line">	   ...</span><br></pre></td></tr></table></figure>
 
 <p>例子：</p>
@@ -675,6 +675,20 @@
 
 <p>目前我的猜测是RustSBI可能规定了这些符号名，目前还没有查阅RustSBI官方文档验证，打算先将整个rCore过一遍再回来查阅。</p>
 ]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>开源操作系统训练营笔记</category>
+      </categories>
+      <tags>
+        <tag>OS</tag>
+        <tag>RISC-V</tag>
+        <tag>rCore</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>第三章 多道程序与分时多任务 笔记</title>
+    <url>/2024/03/22/%E7%AC%AC%E4%B8%89%E7%AB%A0-%E5%A4%9A%E9%81%93%E7%A8%8B%E5%BA%8F%E4%B8%8E%E5%88%86%E6%97%B6%E5%A4%9A%E4%BB%BB%E5%8A%A1-%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[]]></content>
       <categories>
         <category>self-learning-recording</category>
         <category>开源操作系统训练营笔记</category>
