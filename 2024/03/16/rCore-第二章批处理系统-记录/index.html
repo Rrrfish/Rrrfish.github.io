@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/bitbug_favicon32_32.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/bitbug_favicon16_16.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="rCore | 第二章批处理系统 记录">
+<meta property="og:url" content="http://example.com/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/index.html">
+<meta property="og:site_name" content="Rrrfish">
+<meta property="og:description" content="希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2024-03-16T13:39:51.000Z">
+<meta property="article:modified_time" content="2024-03-22T12:28:43.609Z">
+<meta property="article:author" content="Rrrfish">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="RISC-V">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>rCore | 第二章批处理系统 记录 | Rrrfish</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Rrrfish</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Rrrfish's Blog</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/Astronaut.jpg">
+      <meta itemprop="name" content="Rrrfish">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Rrrfish">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          rCore | 第二章批处理系统 记录
+        </h1>
+
+        <div class="post-meta">
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-03-16 21:39:51" itemprop="dateCreated datePublished" datetime="2024-03-16T21:39:51+08:00">2024-03-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-03-22 20:28:43" itemprop="dateModified" datetime="2024-03-22T20:28:43+08:00">2024-03-22</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/" itemprop="url" rel="index"><span itemprop="name">self-learning-recording</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/self-learning-recording/%E5%BC%80%E6%BA%90%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AE%AD%E7%BB%83%E8%90%A5%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">开源操作系统训练营笔记</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。</p>
+<span id="more"></span>
+
+<p>这一章加入了特权级机制，主要有两个方面：内核和应用分布在内存的不同部分，进行物理隔离；内核态拥有特殊的寄存器。<br>但由于是batch system，我们的应用程序将被加载到内存同一起始位置覆盖而进行轮流执行。</p>
+<h1 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h1><h2 id="任务管理器AppManager"><a href="#任务管理器AppManager" class="headerlink" title="任务管理器AppManager"></a>任务管理器AppManager</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">AppManager</span> &#123;</span><br><span class="line">    num_app: <span class="type">usize</span>,</span><br><span class="line">    current_app: <span class="type">usize</span>,</span><br><span class="line">    app_start: [<span class="type">usize</span>; MAX_APP_NUM + <span class="number">1</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AppManager的关键功能是load_app，它的实现逻辑是删除从app起始地址（0x80400000）开始的一段内存，再从app list中获取所需的app code切片，将其copy到0x80400000。最重要的一步是执行指令fence.i。</p>
+<h3 id="fence-i"><a href="#fence-i" class="headerlink" title="fence.i"></a>fence.i</h3><p>指导书中对fence.i的解释是及时刷新i-cache中的内容，防止取指结果不是最新的。这部分内容和我在网上查阅的资料有一点点出入，搜索结果并没有找到fence.i和i-cache的关系，但也有可能是我学识浅薄，没有看出它们的直接联系。</p>
+<p>网上查阅结果表明RISC-V采用relaxed memory model（松散内存模型），这种内存模型可以改变指令执行顺序来提升处理器性能。fence.i的作用是让该指令之前的所有汇编指令都发生在fence.i之后的指令之前。这个指导书中的原文“ <em>它的功能是保证 在它之后的取指过程必须能够看到在它之前的所有对于取指内存区域的修改</em> ”相符。这样就可以在松散内存模型下保证指令的正确执行顺序，确保数据一致性和程序的正确同步。</p>
+<h2 id="Trap处理"><a href="#Trap处理" class="headerlink" title="Trap处理"></a>Trap处理</h2><h3 id="TrapContext"><a href="#TrapContext" class="headerlink" title="TrapContext"></a>TrapContext</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[repr(C)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">TrapContext</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> x: [<span class="type">usize</span>; <span class="number">32</span>],</span><br><span class="line">    <span class="keyword">pub</span> sstatus: Sstatus,</span><br><span class="line">    <span class="keyword">pub</span> sepc: <span class="type">usize</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>x保存通用寄存器，其中，x10<del>x17保存函数参数，x17(a7)保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数<code>__alltraps</code>中需要保存<code>x1</code>、<code>x3</code>、<code>x4(sp)</code>和&#96;x5</del>x31&#96;。</p>
+<p>sstatus保存Trap之前CPU处于哪个特权级。</p>
+<p>sepc保存当Trap是异常时，保存Trap之前执行的最后一条指令的地址。</p>
+<h2 id="usize切片和u8切片（app的加载与清除）"><a href="#usize切片和u8切片（app的加载与清除）" class="headerlink" title="usize切片和u8切片（app的加载与清除）"></a>usize切片和u8切片（app的加载与清除）</h2><p>usize大小适配当前平台，一般为32或64，所以极为适合当作指针。<br>u8就是字节，可以用字节切片来清除和加载程序。</p>
+<p>写程序时不打细心，u8用成usize了，切片长度却没有改变，就报错了，排查了好半天。</p>
+<h1 id="内核栈和用户栈的设置"><a href="#内核栈和用户栈的设置" class="headerlink" title="内核栈和用户栈的设置"></a>内核栈和用户栈的设置</h1><p>这里采用static结构体变量来设置内核栈和用户栈，它们在内存中的具体由rust代码决定。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> KERNEL_STACK: KernelStack = Kernel Statck &#123;</span><br><span class="line">    data: [<span class="number">0</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> USER_STACK: UserStack = UserStack &#123;</span><br><span class="line">    data: [<span class="number">0</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>linker.ld</code>中我们设置了内存布局，<code>stack</code>段从<code>0x80207000</code>开始。经过打印内存地址实验发现：<br>由于静态变量在编译期间就完成好了处理，如果代码如上面的顺序（先写内核栈后写用户栈），那么地址打印结果如下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User sp addr: 0x80209000</span><br><span class="line">Kernel sp addr: 0x80207000</span><br></pre></td></tr></table></figure>
+
+<p>显然是先放置KernelStack后放置UserStack。</p>
+<p>如果交换二者在rust代码中的位置（下面这种）。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">User sp addr: 0x80207000</span><br><span class="line">Kernel sp addr: 0x80209000</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="关于sscratch"><a href="#关于sscratch" class="headerlink" title="关于sscratch"></a>关于sscratch</h2><p>sscratch在程序的最开始是如何得知内核栈栈顶的位置的？</p>
+<p>在初始化内核栈（也就是第一次调用__restore)的时候，有</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mv sp, a0 #将第一个参数，也就是Kernel的TrapContext的地址(位于KernelStack的栈顶)</span><br><span class="line">......</span><br><span class="line">csrrw sp, sscratch, sp </span><br><span class="line">sret</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="手动处理程序"><a href="#手动处理程序" class="headerlink" title="手动处理程序"></a>手动处理程序</h1><p>终于成功跑起来了，程序最后一个Bug竟然是少写了一条指令，保存上下文的汇编函数少写了一条<code>mv a0, sp</code>导致从第三个app就开始<code>panic LoadFault</code>。</p>
+<p>因为还不太会makefile，就手动处理和加载的程序。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># /os</span></span><br><span class="line">cargo build --release</span><br><span class="line"><span class="comment"># /user</span></span><br><span class="line">python3 build.py</span><br><span class="line"><span class="comment"># /os</span></span><br><span class="line">rust-objcopy --strip-all target/riscv64gc-unknown-none-elf/release/os -O binary target/riscv64gc-unknown-none-elf/release/os.bin</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="疑点"><a href="#疑点" class="headerlink" title="疑点"></a>疑点</h1><h2 id="1-关于函数调用栈"><a href="#1-关于函数调用栈" class="headerlink" title="1. 关于函数调用栈"></a>1. 关于函数调用栈</h2><p>在第三章第二节有言，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</span><br></pre></td></tr></table></figure>
+
+<p>突然意识到，编译器是如何识别我们设置的栈的？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># os/src/entry.asm</span><br><span class="line">    .section .text.entry</span><br><span class="line">    .globl _start</span><br><span class="line">_start:</span><br><span class="line">    la sp, boot_stack_top</span><br><span class="line">    call rust_main</span><br><span class="line"></span><br><span class="line">    .section .bss.stack</span><br><span class="line">    .globl boot_stack_lower_bound</span><br><span class="line">boot_stack_lower_bound:</span><br><span class="line">    .space 4096 * 16</span><br><span class="line">    .globl boot_stack_top</span><br><span class="line">boot_stack_top:</span><br></pre></td></tr></table></figure>
+
+<p>上述汇编代码中的symbol boot_stack_lower_bound和boot_stack_top是固定名称吗？我写成my_stack_lower和my_stack_top又如何？我并没有查阅到相关资料，只能询问gpt4，它的回答是并非固定的。经过我个人实践检验，更改symbol名称会导致</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">error: linking with `rust-lld` failed: <span class="built_in">exit</span> status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: LC_ALL=<span class="string">&quot;C&quot;</span> PATH=<span class="string">&quot;略&quot;</span> <span class="string">&quot;--gc-sections&quot;</span> <span class="string">&quot;-O1&quot;</span> <span class="string">&quot;-Tsrc/linker.ld&quot;</span></span><br><span class="line">  = note: rust-lld: error: undefined symbol: boot_stack_top</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(.text.entry+0x0)</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line">          rust-lld: error: undefined symbol: boot_stack_lower_bound</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin <span class="string">&quot;os&quot;</span>) due to 1 previous error</span><br></pre></td></tr></table></figure>
+
+<p>目前我的猜测是RustSBI可能规定了这些符号名，目前还没有查阅RustSBI官方文档验证，打算先将整个rCore过一遍再回来查阅。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/RISC-V/" rel="tag"># RISC-V</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/" rel="prev" title="在x86_64平台上移除标准库依赖">
+      <i class="fa fa-chevron-left"></i> 在x86_64平台上移除标准库依赖
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="next" title="MakeFile学习笔记">
+      MakeFile学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E6%A0%B8"><span class="nav-text">内核</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86%E5%99%A8AppManager"><span class="nav-text">任务管理器AppManager</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#fence-i"><span class="nav-text">fence.i</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trap%E5%A4%84%E7%90%86"><span class="nav-text">Trap处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#TrapContext"><span class="nav-text">TrapContext</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#usize%E5%88%87%E7%89%87%E5%92%8Cu8%E5%88%87%E7%89%87%EF%BC%88app%E7%9A%84%E5%8A%A0%E8%BD%BD%E4%B8%8E%E6%B8%85%E9%99%A4%EF%BC%89"><span class="nav-text">usize切片和u8切片（app的加载与清除）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E6%A0%88%E5%92%8C%E7%94%A8%E6%88%B7%E6%A0%88%E7%9A%84%E8%AE%BE%E7%BD%AE"><span class="nav-text">内核栈和用户栈的设置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8Esscratch"><span class="nav-text">关于sscratch</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%8B%E5%8A%A8%E5%A4%84%E7%90%86%E7%A8%8B%E5%BA%8F"><span class="nav-text">手动处理程序</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%96%91%E7%82%B9"><span class="nav-text">疑点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88"><span class="nav-text">1. 关于函数调用栈</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Rrrfish"
+      src="/images/Astronaut.jpg">
+  <p class="site-author-name" itemprop="name">Rrrfish</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-laugh-wink"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Rrrfish</span>
+</div>
+  <div class="powered-by">
+    
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

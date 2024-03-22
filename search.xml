@@ -621,4 +621,70 @@
         <tag>hexo</tag>
       </tags>
   </entry>
+  <entry>
+    <title>rCore | 第二章批处理系统 记录</title>
+    <url>/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<p>希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。</p>
+<span id="more"></span>
+
+<p>这一章加入了特权级机制，主要有两个方面：内核和应用分布在内存的不同部分，进行物理隔离；内核态拥有特殊的寄存器。<br>但由于是batch system，我们的应用程序将被加载到内存同一起始位置覆盖而进行轮流执行。</p>
+<h1 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h1><h2 id="任务管理器AppManager"><a href="#任务管理器AppManager" class="headerlink" title="任务管理器AppManager"></a>任务管理器AppManager</h2><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">AppManager</span> &#123;</span><br><span class="line">    num_app: <span class="type">usize</span>,</span><br><span class="line">    current_app: <span class="type">usize</span>,</span><br><span class="line">    app_start: [<span class="type">usize</span>; MAX_APP_NUM + <span class="number">1</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AppManager的关键功能是load_app，它的实现逻辑是删除从app起始地址（0x80400000）开始的一段内存，再从app list中获取所需的app code切片，将其copy到0x80400000。最重要的一步是执行指令fence.i。</p>
+<h3 id="fence-i"><a href="#fence-i" class="headerlink" title="fence.i"></a>fence.i</h3><p>指导书中对fence.i的解释是及时刷新i-cache中的内容，防止取指结果不是最新的。这部分内容和我在网上查阅的资料有一点点出入，搜索结果并没有找到fence.i和i-cache的关系，但也有可能是我学识浅薄，没有看出它们的直接联系。</p>
+<p>网上查阅结果表明RISC-V采用relaxed memory model（松散内存模型），这种内存模型可以改变指令执行顺序来提升处理器性能。fence.i的作用是让该指令之前的所有汇编指令都发生在fence.i之后的指令之前。这个指导书中的原文“ <em>它的功能是保证 在它之后的取指过程必须能够看到在它之前的所有对于取指内存区域的修改</em> ”相符。这样就可以在松散内存模型下保证指令的正确执行顺序，确保数据一致性和程序的正确同步。</p>
+<h2 id="Trap处理"><a href="#Trap处理" class="headerlink" title="Trap处理"></a>Trap处理</h2><h3 id="TrapContext"><a href="#TrapContext" class="headerlink" title="TrapContext"></a>TrapContext</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(C)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">TrapContext</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> x: [<span class="type">usize</span>; <span class="number">32</span>],</span><br><span class="line">    <span class="keyword">pub</span> sstatus: Sstatus,</span><br><span class="line">    <span class="keyword">pub</span> sepc: <span class="type">usize</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>x保存通用寄存器，其中，x10<del>x17保存函数参数，x17(a7)保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数<code>__alltraps</code>中需要保存<code>x1</code>、<code>x3</code>、<code>x4(sp)</code>和&#96;x5</del>x31&#96;。</p>
+<p>sstatus保存Trap之前CPU处于哪个特权级。</p>
+<p>sepc保存当Trap是异常时，保存Trap之前执行的最后一条指令的地址。</p>
+<h2 id="usize切片和u8切片（app的加载与清除）"><a href="#usize切片和u8切片（app的加载与清除）" class="headerlink" title="usize切片和u8切片（app的加载与清除）"></a>usize切片和u8切片（app的加载与清除）</h2><p>usize大小适配当前平台，一般为32或64，所以极为适合当作指针。<br>u8就是字节，可以用字节切片来清除和加载程序。</p>
+<p>写程序时不打细心，u8用成usize了，切片长度却没有改变，就报错了，排查了好半天。</p>
+<h1 id="内核栈和用户栈的设置"><a href="#内核栈和用户栈的设置" class="headerlink" title="内核栈和用户栈的设置"></a>内核栈和用户栈的设置</h1><p>这里采用static结构体变量来设置内核栈和用户栈，它们在内存中的具体由rust代码决定。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> KERNEL_STACK: KernelStack = Kernel Statck &#123;</span><br><span class="line">    data: [<span class="number">0</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> USER_STACK: UserStack = UserStack &#123;</span><br><span class="line">    data: [<span class="number">0</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>linker.ld</code>中我们设置了内存布局，<code>stack</code>段从<code>0x80207000</code>开始。经过打印内存地址实验发现：<br>由于静态变量在编译期间就完成好了处理，如果代码如上面的顺序（先写内核栈后写用户栈），那么地址打印结果如下。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80209000</span><br><span class="line">Kernel sp addr: 0x80207000</span><br></pre></td></tr></table></figure>
+
+<p>显然是先放置KernelStack后放置UserStack。</p>
+<p>如果交换二者在rust代码中的位置（下面这种）。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80207000</span><br><span class="line">Kernel sp addr: 0x80209000</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="关于sscratch"><a href="#关于sscratch" class="headerlink" title="关于sscratch"></a>关于sscratch</h2><p>sscratch在程序的最开始是如何得知内核栈栈顶的位置的？</p>
+<p>在初始化内核栈（也就是第一次调用__restore)的时候，有</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mv sp, a0 #将第一个参数，也就是Kernel的TrapContext的地址(位于KernelStack的栈顶)</span><br><span class="line">......</span><br><span class="line">csrrw sp, sscratch, sp </span><br><span class="line">sret</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="手动处理程序"><a href="#手动处理程序" class="headerlink" title="手动处理程序"></a>手动处理程序</h1><p>终于成功跑起来了，程序最后一个Bug竟然是少写了一条指令，保存上下文的汇编函数少写了一条<code>mv a0, sp</code>导致从第三个app就开始<code>panic LoadFault</code>。</p>
+<p>因为还不太会makefile，就手动处理和加载的程序。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /os</span></span><br><span class="line">cargo build --release</span><br><span class="line"><span class="comment"># /user</span></span><br><span class="line">python3 build.py</span><br><span class="line"><span class="comment"># /os</span></span><br><span class="line">rust-objcopy --strip-all target/riscv64gc-unknown-none-elf/release/os -O binary target/riscv64gc-unknown-none-elf/release/os.bin</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="疑点"><a href="#疑点" class="headerlink" title="疑点"></a>疑点</h1><h2 id="1-关于函数调用栈"><a href="#1-关于函数调用栈" class="headerlink" title="1. 关于函数调用栈"></a>1. 关于函数调用栈</h2><p>在第三章第二节有言，</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</span><br></pre></td></tr></table></figure>
+
+<p>突然意识到，编译器是如何识别我们设置的栈的？</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># os/src/entry.asm</span><br><span class="line">    .section .text.entry</span><br><span class="line">    .globl _start</span><br><span class="line">_start:</span><br><span class="line">    la sp, boot_stack_top</span><br><span class="line">    call rust_main</span><br><span class="line"></span><br><span class="line">    .section .bss.stack</span><br><span class="line">    .globl boot_stack_lower_bound</span><br><span class="line">boot_stack_lower_bound:</span><br><span class="line">    .space 4096 * 16</span><br><span class="line">    .globl boot_stack_top</span><br><span class="line">boot_stack_top:</span><br></pre></td></tr></table></figure>
+
+<p>上述汇编代码中的symbol boot_stack_lower_bound和boot_stack_top是固定名称吗？我写成my_stack_lower和my_stack_top又如何？我并没有查阅到相关资料，只能询问gpt4，它的回答是并非固定的。经过我个人实践检验，更改symbol名称会导致</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">error: linking with `rust-lld` failed: <span class="built_in">exit</span> status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: LC_ALL=<span class="string">&quot;C&quot;</span> PATH=<span class="string">&quot;略&quot;</span> <span class="string">&quot;--gc-sections&quot;</span> <span class="string">&quot;-O1&quot;</span> <span class="string">&quot;-Tsrc/linker.ld&quot;</span></span><br><span class="line">  = note: rust-lld: error: undefined symbol: boot_stack_top</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(.text.entry+0x0)</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line">          rust-lld: error: undefined symbol: boot_stack_lower_bound</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin <span class="string">&quot;os&quot;</span>) due to 1 previous error</span><br></pre></td></tr></table></figure>
+
+<p>目前我的猜测是RustSBI可能规定了这些符号名，目前还没有查阅RustSBI官方文档验证，打算先将整个rCore过一遍再回来查阅。</p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>开源操作系统训练营笔记</category>
+      </categories>
+      <tags>
+        <tag>OS</tag>
+        <tag>RISC-V</tag>
+      </tags>
+  </entry>
 </search>
