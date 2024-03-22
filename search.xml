@@ -10,105 +10,16 @@
       </tags>
   </entry>
   <entry>
-    <title>hexo next配置</title>
-    <url>/2024/03/21/hexo-next%E9%85%8D%E7%BD%AE/</url>
-    <content><![CDATA[<h1 id="文字颜色"><a href="#文字颜色" class="headerlink" title="文字颜色"></a>文字颜色</h1><p>文件Blog\themes\next\source\css_variables\Pisces.styl中可以修改文字颜色等。</p>
-<p>如sidebar的颜色</p>
-<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Sidebar</span></span><br><span class="line"><span class="comment">// --------------------------------------------------</span></span><br><span class="line"><span class="variable">$sidebar</span>-nav-<span class="attribute">color</span>                = <span class="built_in">var</span>(--text-color);</span><br><span class="line"><span class="variable">$sidebar</span>-nav-hover-<span class="attribute">color</span>          = <span class="number">#475F99</span>;</span><br><span class="line"><span class="variable">$sidebar</span>-highlight                = <span class="number">#475F99</span>;</span><br></pre></td></tr></table></figure>
-
-]]></content>
-      <tags>
-        <tag>hexo</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>MakeFile学习笔记</title>
-    <url>/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-    <content><![CDATA[<h1 id="GNU-Make"><a href="#GNU-Make" class="headerlink" title="GNU Make"></a>GNU Make</h1><h2 id="Make的用途"><a href="#Make的用途" class="headerlink" title="Make的用途"></a>Make的用途</h2><ol>
-<li>供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。</li>
-<li>Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。</li>
-<li>make支持很多语言。</li>
-<li>make可以建包，安装卸载包，生成包的标签等等。</li>
-</ol>
+    <title>API与ABI</title>
+    <url>/2023/10/29/API%E4%B8%8EABI/</url>
+    <content><![CDATA[<p>ABI(Application Binary Interface)与API(Application Programming Interface)</p>
+<p>二者都是规定的协议，只不过维度不同。API是编程级的概念，ABI是二进制级的概念。前者包括编程中的函数、网络请求等，后者规定了诸如底层上函数的调用规则、变量的存储方式、堆栈的分布方式等等。</p>
 <span id="more"></span>
 
-<h2 id="TODO阅读大型项目"><a href="#TODO阅读大型项目" class="headerlink" title="TODO阅读大型项目"></a>TODO阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等。</p>
-<h2 id="Makefile的规格"><a href="#Makefile的规格" class="headerlink" title="Makefile的规格"></a>Makefile的规格</h2><figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">target ...    : prerequisites(依赖) ...</span><br><span class="line">	   recipe(命令)</span><br><span class="line">	   ...</span><br><span class="line">	   ...</span><br></pre></td></tr></table></figure>
-
-<p>例子：</p>
-<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br><span class="line">		</span><br></pre></td></tr></table></figure>
-
-<h3 id="默认目标"><a href="#默认目标" class="headerlink" title="默认目标"></a>默认目标</h3><p>在Makefile中，当执行<code>make</code>命令而不带任何参数时，<code>make</code>工具默认尝试构建第一个目标，这个目标被称为默认目标,也就是这里的<code>hello</code>。</p>
-<p><code>hello</code>依赖于<code>hello.o</code>，如果<code>hello.o</code>是最新的，那么<code>make</code>会直接执行<code>gcc -c hello hello.o</code>；如果不是，那么会寻找依赖目标。递归进行上述操作。最后自动调整命令执行的顺序再执行命令。</p>
-<p>在这里<code>clean</code>不是默认目标，必须要手动执行<code>make clean</code>时才会被调用。</p>
-<h3 id="PHONY-伪目标"><a href="#PHONY-伪目标" class="headerlink" title=".PHONY(伪目标)"></a>.PHONY(伪目标)</h3><p>如果我们的目录里存在一个名为<code>clean</code>的文件，make会认为目标<code>clean</code>已经是最新的，不需要再执行了，为了避免此情况我们需要在makefile的clean上一行加入<code>.PHONY</code>，那样<code>make</code>就会无视是否存在<code>clean</code>文件了。</p>
-<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="meta"><span class="keyword">.PHONY</span>: clean</span></span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
-
-<h3 id="设置默认目标"><a href="#设置默认目标" class="headerlink" title="设置默认目标"></a>设置默认目标</h3><figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">.DEFALT_GOAL = clean</span><br><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
-
-<p>看例子就懂，原来的<code>hello</code>就不是默认目标了。</p>
-<h1 id="待更新"><a href="#待更新" class="headerlink" title="待更新"></a>待更新</h1>]]></content>
-      <categories>
-        <category>Tools</category>
-      </categories>
-      <tags>
-        <tag>MakeFile</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>rCore | 第二章批处理系统 记录</title>
-    <url>/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/</url>
-    <content><![CDATA[<p>希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。</p>
-<span id="more"></span>
-
-<p>这一章加入了特权级机制，主要有两个方面：内核和应用分布在内存的不同部分，进行物理隔离；内核态拥有特殊的寄存器。<br>但由于是batch system，我们的应用程序将被加载到内存同一起始位置覆盖而进行轮流执行。</p>
-<h1 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h1><h2 id="任务管理器AppManager"><a href="#任务管理器AppManager" class="headerlink" title="任务管理器AppManager"></a>任务管理器AppManager</h2><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">AppManager</span> &#123;</span><br><span class="line">    num_app: <span class="type">usize</span>,</span><br><span class="line">    current_app: <span class="type">usize</span>,</span><br><span class="line">    app_start: [<span class="type">usize</span>; MAX_APP_NUM + <span class="number">1</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>AppManager的关键功能是load_app，它的实现逻辑是删除从app起始地址（0x80400000）开始的一段内存，再从app list中获取所需的app code切片，将其copy到0x80400000。最重要的一步是执行指令fence.i。</p>
-<h3 id="fence-i"><a href="#fence-i" class="headerlink" title="fence.i"></a>fence.i</h3><p>指导书中对fence.i的解释是及时刷新i-cache中的内容，防止取指结果不是最新的。这部分内容和我在网上查阅的资料有一点点出入，搜索结果并没有找到fence.i和i-cache的关系，但也有可能是我学识浅薄，没有看出它们的直接联系。</p>
-<p>网上查阅结果表明RISC-V采用relaxed memory model（松散内存模型），这种内存模型可以改变指令执行顺序来提升处理器性能。fence.i的作用是让该指令之前的所有汇编指令都发生在fence.i之后的指令之前。这个指导书中的原文“ <em>它的功能是保证 在它之后的取指过程必须能够看到在它之前的所有对于取指内存区域的修改</em> ”相符。这样就可以在松散内存模型下保证指令的正确执行顺序，确保数据一致性和程序的正确同步。</p>
-<h2 id="Trap处理"><a href="#Trap处理" class="headerlink" title="Trap处理"></a>Trap处理</h2><h3 id="TrapContext"><a href="#TrapContext" class="headerlink" title="TrapContext"></a>TrapContext</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(C)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">TrapContext</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> x: [<span class="type">usize</span>; <span class="number">32</span>],</span><br><span class="line">    <span class="keyword">pub</span> sstatus: Sstatus,</span><br><span class="line">    <span class="keyword">pub</span> sepc: <span class="type">usize</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>x保存通用寄存器。<code>x10~x17</code> 保存函数参数，<code>x17(a7)</code> 保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数 <code>__alltraps</code> 中需要保存 <code>x1</code>、<code>x3 </code>、<code>x4(sp)</code> 和 <code>x5~x31</code> 。sstatus保存Trap之前CPU处于哪个特权级。</p>
-<p>sepc保存当Trap是异常时，保存Trap之前执行的最后一条指令的地址。</p>
-<h2 id="usize切片和u8切片（app的加载与清除）"><a href="#usize切片和u8切片（app的加载与清除）" class="headerlink" title="usize切片和u8切片（app的加载与清除）"></a>usize切片和u8切片（app的加载与清除）</h2><p>usize大小适配当前平台，一般为32或64，所以极为适合当作指针。<br>u8就是字节，可以用字节切片来清除和加载程序。</p>
-<p>写程序时不打细心，u8用成usize了，切片长度却没有改变，就报错了，排查了好半天。</p>
-<h1 id="内核栈和用户栈的设置"><a href="#内核栈和用户栈的设置" class="headerlink" title="内核栈和用户栈的设置"></a>内核栈和用户栈的设置</h1><p>这里采用static结构体变量来设置内核栈和用户栈，它们在内存中的具体由rust代码决定。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> KERNEL_STACK: KernelStack = Kernel Statck &#123;</span><br><span class="line">    data: [<span class="number">0</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> USER_STACK: UserStack = UserStack &#123;</span><br><span class="line">    data: [<span class="number">0</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在<code>linker.ld</code>中我们设置了内存布局，<code>stack</code>段从<code>0x80207000</code>开始。经过打印内存地址实验发现：<br>由于静态变量在编译期间就完成好了处理，如果代码如上面的顺序（先写内核栈后写用户栈），那么地址打印结果如下。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80209000</span><br><span class="line">Kernel sp addr: 0x80207000</span><br></pre></td></tr></table></figure>
-
-<p>显然是先放置KernelStack后放置UserStack。</p>
-<p>如果交换二者在rust代码中的位置（下面这种）。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>打印结果如下：</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80207000</span><br><span class="line">Kernel sp addr: 0x80209000</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="关于sscratch"><a href="#关于sscratch" class="headerlink" title="关于sscratch"></a>关于sscratch</h2><p>sscratch在程序的最开始是如何得知内核栈栈顶的位置的？</p>
-<p>在初始化内核栈（也就是第一次调用__restore)的时候，有</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mv sp, a0 #将第一个参数，也就是Kernel的TrapContext的地址(位于KernelStack的栈顶)</span><br><span class="line">......</span><br><span class="line">csrrw sp, sscratch, sp </span><br><span class="line">sret</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="手动处理程序"><a href="#手动处理程序" class="headerlink" title="手动处理程序"></a>手动处理程序</h1><p>终于成功跑起来了，程序最后一个Bug竟然是少写了一条指令，保存上下文的汇编函数少写了一条<code>mv a0, sp</code>导致从第三个app就开始<code>panic LoadFault</code>。</p>
-<p>因为还不太会makefile，就手动处理和加载的程序。</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /os</span></span><br><span class="line">cargo build --release</span><br><span class="line"><span class="comment"># /user</span></span><br><span class="line">python3 build.py</span><br><span class="line"><span class="comment"># /os</span></span><br><span class="line">rust-objcopy --strip-all target/riscv64gc-unknown-none-elf/release/os -O binary target/riscv64gc-unknown-none-elf/release/os.bin</span><br></pre></td></tr></table></figure>
-
-
-
-<h1 id="疑点"><a href="#疑点" class="headerlink" title="疑点"></a>疑点</h1><h2 id="1-关于函数调用栈"><a href="#1-关于函数调用栈" class="headerlink" title="1. 关于函数调用栈"></a>1. 关于函数调用栈</h2><p>在第三章第二节有言，</p>
-<p><code>函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</code></p>
-<p>突然意识到，编译器是如何识别我们设置的栈的？</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># os/src/entry.asm</span><br><span class="line">    .section .text.entry</span><br><span class="line">    .globl _start</span><br><span class="line">_start:</span><br><span class="line">    la sp, boot_stack_top</span><br><span class="line">    call rust_main</span><br><span class="line"></span><br><span class="line">    .section .bss.stack</span><br><span class="line">    .globl boot_stack_lower_bound</span><br><span class="line">boot_stack_lower_bound:</span><br><span class="line">    .space 4096 * 16</span><br><span class="line">    .globl boot_stack_top</span><br><span class="line">boot_stack_top:</span><br></pre></td></tr></table></figure>
-
-<p>上述汇编代码中的symbol boot_stack_lower_bound和boot_stack_top是固定名称吗？我写成my_stack_lower和my_stack_top又如何？我并没有查阅到相关资料，只能询问gpt4，它的回答是并非固定的。经过我个人实践检验，更改symbol名称会导致</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">error: linking with `rust-lld` failed: <span class="built_in">exit</span> status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: LC_ALL=<span class="string">&quot;C&quot;</span> PATH=<span class="string">&quot;略&quot;</span> <span class="string">&quot;--gc-sections&quot;</span> <span class="string">&quot;-O1&quot;</span> <span class="string">&quot;-Tsrc/linker.ld&quot;</span></span><br><span class="line">  = note: rust-lld: error: undefined symbol: boot_stack_top</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(.text.entry+0x0)</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line">          rust-lld: error: undefined symbol: boot_stack_lower_bound</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin <span class="string">&quot;os&quot;</span>) due to 1 previous error</span><br></pre></td></tr></table></figure>
-
-<p>目前我的猜测是RustSBI可能规定了这些符号名，目前还没有查阅RustSBI官方文档验证，打算先将整个rCore过一遍再回来查阅。</p>
+<p>API相同时ABI可能也不兼容，像是C语言在不同机器上调用，之前编译得到的二进制码的ABI不符合现在机器的ABI，所以需要重新编译。又比如说，两份C语言写成的代码文件，分别用不同的编译器进行编译，能够将他们链接在一起吗？这就取决于两个编译器的ABI是否相同，换言之就是以下内容是否遵守：采用同样的目标文件格式、拥有同样的符号修饰标准、变量的内存分布方式相同、函数的调用方式相同等等。</p>
+<p>以下课本原文：</p>
+<p><em>应用程序二进制接口 ABI 是不同二进制代码片段的连接纽带。ABI 定义了二进制机器代码级别的规则，主要包括基本数据类型、通用寄存器的使用、参数的传递规则、以及堆栈的使用等等。ABI 与处理器和内存地址等硬件架构相关，是用来约束链接器 (Linker) 和汇编器 (Assembler) 的。在同一处理器下，基于不同高级语言编写的应用程序、库和操作系统，如果遵循同样的 ABI 定义，那么它们就能正确链接和执行。</em></p>
+<p><em>应用程序编程接口 API 是不同源代码片段的连接纽带。API 定义了一个源码级（如 C 语言）函数的参数，参数的类型，函数的返回值等。因此 API 是用来约束编译器 (Compiler) 的：一个 API 是给编译器的一些指令，它规定了源代码可以做以及不可以做哪些事。API 与编程语言相关，如 libc 是基于 C 语言编写的标准库，那么基于 C 的应用程序就可以通过编译器建立与 libc 的联系，并能在运行中正确访问 libc 中的函数。</em></p>
 ]]></content>
       <categories>
         <category>self-learning-recording</category>
@@ -116,65 +27,159 @@
       </categories>
       <tags>
         <tag>OS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RISCV和MIPS的汇编指令的区别</title>
+    <url>/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
+    <content><![CDATA[<p>RISC-V和MIPS在汇编指令方面存在一定的区别。</p>
+<span id="more"></span>
+
+<h3 id="在指令类型方面"><a href="#在指令类型方面" class="headerlink" title="在指令类型方面"></a>在指令类型方面</h3><h4 id="RISCV分为R-type、I-type、J-type和S-type等"><a href="#RISCV分为R-type、I-type、J-type和S-type等" class="headerlink" title="RISCV分为R-type、I-type、J-type和S-type等"></a>RISCV分为R-type、I-type、J-type和S-type等</h4><p>R-type(add etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/R-type-format.png"></p>
+<p>I-type(addi、beq、ld etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020191816122.png" alt="image-20231020191816122"></p>
+<p>S-type(sd etc)</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020192654393.png" alt="image-20231020192654393"></p>
+<h4 id="MIPS分为R-type、I-type、J-type（只有这三种）"><a href="#MIPS分为R-type、I-type、J-type（只有这三种）" class="headerlink" title="MIPS分为R-type、I-type、J-type（只有这三种）"></a>MIPS分为R-type、I-type、J-type（只有这三种）</h4><p>R-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L20wXzU3NDQ2Mjg0,size_16,color_FFFFFF,t_70.png" alt="img"></p>
+<p>I-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
+<p>J-type</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515172043999.png" alt="img"></p>
+<p>MIPS是没有S-type的！store word指令属于I-type。</p>
+<h3 id="指令格式-instruction-format-和汇编指令中寄存器的相对位置"><a href="#指令格式-instruction-format-和汇编指令中寄存器的相对位置" class="headerlink" title="指令格式(instruction format)和汇编指令中寄存器的相对位置"></a>指令格式(instruction format)和汇编指令中寄存器的相对位置</h3><p>RISCV的机器码format的寄存器相对位置和汇编指令的相对位置是相同的，比如：R-type中，指令格式为先目标寄存器(rs1、rs2)后源寄存器(rd)，和汇编的顺序相同</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add x9, x20, x21</span><br></pre></td></tr></table></figure>
+
+<p>代表着将x21和x20内的数据相加存进x9中，这段汇编指令的对应字段值是</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194223559.png" alt="image-20231020194223559"></p>
+<p>MIPS却是不同的，比如：R-type中，指令格式为先源寄存器(rs、rt)后目标寄存器(rd)，和汇编的顺序相反（但是两个源寄存器的相对位置是相同的，都是先rs再rt）。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add $s0, $s1, $s2 #s1存17、s2存18、s0存16</span><br></pre></td></tr></table></figure>
+
+<p>这段汇编指令的对应字段值是</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194443779.png" alt="image-20231020194443779"></p>
+<h5 id="RISCV对于立即数指令的推断能力"><a href="#RISCV对于立即数指令的推断能力" class="headerlink" title="RISCV对于立即数指令的推断能力"></a>RISCV对于立即数指令的推断能力</h5><p>在RISC-V中，当处理常数时，程序员无需明确使用“addi”指令；相反，他们可以简单地写“add”，汇编器将根据操作数是全部寄存器（R型）还是其中一个是常数（I型），生成适当的操作码和指令格式。在RISC-V中对不同操作码和格式使用明确的名称旨在在引入汇编语言时相对于机器语言减少混淆。</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020200008385.png" alt="image-20231020200008385"></p>
+<p>MIPS是否有这种功能不太清楚，实际上RISCV的这种能力在互联网上也查不到。</p>
+<h3 id="immediate的格式"><a href="#immediate的格式" class="headerlink" title="immediate的格式"></a>immediate的格式</h3><p>MIPS的instruction format中立即数是一体的、不分离的。</p>
+<p>而RISCV中I-type的立即数被截断为两部分，5 bits和7bits，5bits靠近op，7 bits在尾部。这种设计是为了让所有类型的指令中funct3的位置相同（便于硬件的设计）。</p>
+<p>计算这两段fields时，可以将立即数除2^5，商为5 bits部分，余数为7 bits部分。</p>
+<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
+]]></content>
+      <categories>
+        <category>self-learning-recording</category>
+        <category>CS61C</category>
+      </categories>
+      <tags>
         <tag>RISC-V</tag>
-        <tag>rCore</tag>
+        <tag>MIPS</tag>
+        <tag>计算机组成原理</tag>
+        <tag>汇编</tag>
       </tags>
   </entry>
   <entry>
-    <title>在x86_64平台上移除标准库依赖</title>
-    <url>/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/</url>
-    <content><![CDATA[<p>尝试了一下在x86_64平台移除标准库依赖<span id="more"></span>，如果只是单纯地将config文件中的target修改为”x86_64-unknown-linux-gnu”将会有以下报错信息：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">error: language item required, but not found: `eh_personality`</span><br><span class="line">  |</span><br><span class="line">  = note: this can occur when a binary crate with `#![no_std]` is compiled for a target where `eh_personality` is defined in the standard library</span><br><span class="line">  = help: you may be able to compile for a target that doesn&#x27;t need `eh_personality`, specify a target with `--target` or in `.cargo/config`</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to previous error</span><br></pre></td></tr></table></figure>
+    <title>Rust Macros | 宏官方文档的理解</title>
+    <url>/2023/10/31/Rust-Macros-%E5%AE%8F%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9A%84%E7%90%86%E8%A7%A3/</url>
+    <content><![CDATA[<h1 id="宏和函数的区别"><a href="#宏和函数的区别" class="headerlink" title="宏和函数的区别"></a>宏和函数的区别</h1><p>宏属于元编程（metaprogramming)。</p>
+<p>宏可以接受不同数量的参数；宏还可以再一个给定类型上实现trait，函数却不可以：trait需要在编译时实现，而函数却时在运行时被调用，宏就没有这种问题，它在编译器翻译代码之前就会展开。</p>
+<p>调用宏之前必须定义它，或者将其引入作用域（用use关键词）。</p>
+<p>宏有个问题就是定义十分复杂，难以阅读、理解和维护。</p>
+<h1 id="Macros-By-Example"><a href="#Macros-By-Example" class="headerlink" title="Macros By Example"></a>Macros By Example</h1><h2 id="syntax"><a href="#syntax" class="headerlink" title="syntax"></a>syntax</h2><p>这种宏定义方式通过使用示例来让编译器知道生成相应的代码。</p>
+<span id="more"></span>
+
+<h3 id="MacroRulesDefinition"><a href="#MacroRulesDefinition" class="headerlink" title="MacroRulesDefinition"></a>MacroRulesDefinition</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span></span><br></pre></td></tr></table></figure>
+
+<p>用这个关键字来定义宏。</p>
+<h3 id="MacroRulesDef"><a href="#MacroRulesDef" class="headerlink" title="MacroRulesDef"></a>MacroRulesDef</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroRules );</span><br><span class="line">|	[ MacroRules ];</span><br><span class="line">|	&#123; MacroRules &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRules"><a href="#MacroRules" class="headerlink" title="MacroRules"></a>MacroRules</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">MacroRule</span>(; MacroRule)* ;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRule"><a href="#MacroRule" class="headerlink" title="MacroRule"></a>MacroRule</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">MacroMatcher =&gt; MacroTranscriber</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroMatcher"><a href="#MacroMatcher" class="headerlink" title="MacroMatcher"></a>MacroMatcher</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroMatch* )</span><br><span class="line">|	[ MacroMatch* ]</span><br><span class="line">|	&#123; MacroMatch* &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroMatch"><a href="#MacroMatch" class="headerlink" title="MacroMatch"></a>MacroMatch</h3><p>$和delimiters之外的所有token</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">| MacroMatcher</span><br><span class="line">| $( <span class="title function_ invoke__">IDENTIFIER_OR_KERYWORD</span>(不包括<span class="keyword">crate</span>) | RAW_IDENTIFIER | _ ): MacroFragSpec</span><br><span class="line">| $( MacroMatch+ ) MacroRepSep? MacroRepOp</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroFragSpec"><a href="#MacroFragSpec" class="headerlink" title="MacroFragSpec"></a>MacroFragSpec</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	block | expr | ident | item | lifetime | literal </span><br><span class="line">|	meta | pat | pat_param | path |stmt | tt | ty | vis</span><br></pre></td></tr></table></figure>
+
+<h3 id="MacroRepSep"><a href="#MacroRepSep" class="headerlink" title="MacroRepSep"></a>MacroRepSep</h3><p>delimiters和MacroRepOp以外的所有token</p>
+<h3 id="MacroRepOp"><a href="#MacroRepOp" class="headerlink" title="MacroRepOp"></a>MacroRepOp</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">* | + | ?</span><br></pre></td></tr></table></figure>
 
 
 
-<h1 id="eh-personality"><a href="#eh-personality" class="headerlink" title="eh_personality"></a>eh_personality</h1><p>报错信息中的eh_personality是一种lang item，它在stack unwinding过程中标记了一种函数。首先我们要知道什么是lang item。lang item(language item)是编译器内部需要的一种特殊函数和类型，比如说’Copy’ trait，它会告诉编译器哪些类型有复制语义（Copy semantics）。在应用中，#[lang &#x3D; “copy”]就定义了copy是一种lang item。</p>
-<h2 id="Exception-Handling"><a href="#Exception-Handling" class="headerlink" title="Exception Handling"></a>Exception Handling</h2><p>Exception Handling主要分为两个阶段，search phase和cleanup phase。在这两个阶段unwinder会利用当前处理模块（这里指的是OS模块，也就是可执行文件或者动态库）来对帧栈进行从头至尾的扫描。而对于每一个帧栈，unwinder会利用”personality routine”(它的地址存放在unwind section中)<br>然后了解eh_personality的作用，在rust库中解释为stack unwinding过程中的一个lang item，这里插入一下exception handling的过程：</p>
-<h3 id="search-phase"><a href="#search-phase" class="headerlink" title="search phase"></a>search phase</h3><p>“personality routine”会检查被抛出的异常，决定是否在此帧栈catch该异常。</p>
-<h3 id="cleanup-phase"><a href="#cleanup-phase" class="headerlink" title="cleanup phase"></a>cleanup phase</h3><p>unwinder会再次调用各个personality routine，在这个阶段personality routine的作用是决定是否要运行cleanup code。如果运行，unwinder控制权会转交给函数体内部的特殊分支–”landing pad”，它会调用析构函数、释放内存,etc。最后控制权回到unwinder，unwinder继续之前的工作。</p>
-<p>eh_persionality就是上面所说的personality routine。综上我们知道，报错信息中显示”not found ‘eh_personality’”，是因为eh_personality需要操作系统特定的lib，而我们正在从头编写OS，意味着我们将要避免使用任何OS提供的服务或库。这里我们采取的方案是不进行unwind。</p>
-<p>在Cargo.toml中加入以下内容，就可以将panic的应对方式改为abort。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[profile.dev]</span><br><span class="line">panic = &quot;abort&quot;</span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = &quot;abort&quot;</span><br></pre></td></tr></table></figure>
+<p>每个宏都有一个名字，有一至多条rule。</p>
+<p>每个Rule都分为两个部分<strong>matcher</strong>和<strong>transcriber</strong>:</p>
+<p>matcher用来描述他将要匹配的部分的格式，transcriber用来描述成功匹配后将会如何替换原文本。matcher和transcriber都必须被delimiters包裹。</p>
+<p>宏可以扩展至表达式、语句、items（项，包括traits、impls、foreign items）、类型或模式。</p>
+<h2 id="Transcribing"><a href="#Transcribing" class="headerlink" title="Transcribing"></a>Transcribing</h2><p>在这里官方文档举了个例子，看了半天才明白。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
 
-<h1 id="Linker-error"><a href="#Linker-error" class="headerlink" title="Linker error"></a>Linker error</h1><p>但修改后又会遇到报错：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">error: linking with `cc` failed: exit status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start&#x27;:</span><br><span class="line">          (.text+0x16): undefined reference to `__libc_csu_fini&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x1d): undefined reference to `__libc_csu_init&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x24): undefined reference to `main&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x2a): undefined reference to `__libc_start_main&#x27;</span><br><span class="line">          collect2: error: ld returned 1 exit status</span><br><span class="line">          </span><br><span class="line">  = note: some `extern` functions couldn&#x27;t be found; some native libraries may need to be installed or have their path specified</span><br><span class="line">  = note: use the `-l` flag to specify native libraries to link</span><br><span class="line">  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to 1 previous error</span><br></pre></td></tr></table></figure>
+<p>这里为什么会error呢？</p>
+<p>实际上，当一个宏被调用的时候，macro expander会根据名字查找对应宏，然后按照顺序依次尝试匹配macro rule，他会尝试填入第一个成功的匹配，宏的匹配过程是没有lookahead的，所以有时候会造成歧义。如果编译器出现没有明确决定如何parse tokens的时刻，会立即报错。如果遇到error，后面的匹配也不会看了。</p>
+<p>就比如上面那个例子，error被填入$($i:ident)*后，再遇到$j:ident，编译器会一时不知道如何parse，它没有lookahead功能，所以就报错了。把最后一句替换成</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!(error error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
+
+<p>也会照样报错。</p>
+<p>但如果换成下面的代码则可以通过编译。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); </span><br></pre></td></tr></table></figure>
+
+<p>说明这种歧义编译器无法检查到，只能在运行时发现。</p>
+<p>还有一点就是，$在宏中的作用是出发宏引擎（macros engine）的特殊行为，没有被$指定的token会被字面（literally）匹配并转录（transcribe），例如</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* <span class="number">1</span>) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error <span class="number">1</span>]; <span class="comment">//这里1换成其他东西就会报错</span></span><br></pre></td></tr></table></figure>
+
+<p>例外的是，最外层的delimiters可以匹配成任何的delimiters。比如</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ([$($i:ident)*]) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![[error]]; </span><br><span class="line">ambiguity!([error]); </span><br></pre></td></tr></table></figure>
+
+<p>对ambiguity!的两次调用都是合法的，但是下面这个调用会报错。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!((error)); <span class="comment">//Error</span></span><br></pre></td></tr></table></figure>
+
+<p>这样也可以</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error]; <span class="comment">//OK!</span></span><br><span class="line">ambiguity!(error); <span class="comment">//OK!</span></span><br></pre></td></tr></table></figure>
+
+<p>还有一件事，$不能被匹配或者被转录，”$$”是不合法的。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($$:ident)*) =&gt; &#123; &#125;; <span class="comment">// Error!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<p>以上报错信息显示出现了<strong>linker error</strong>，linker的作用是将generated code链接为可执行文件，而各类操作系统的链接方法都不尽相同，所以linker和linker error也会随着操作系统不同发生差异。</p>
-<p>再仔细看报错信息，在函数**’_start’**中我们缺少启动文件。这里我查阅资料后粗略了解了一下_start和C运行时(C runtime)之间的关系。</p>
-<h2 id="start和C运行时-C-runtime"><a href="#start和C运行时-C-runtime" class="headerlink" title="_start和C运行时(C runtime)"></a>_start和C运行时(C runtime)</h2><p>start是比main()更接近底层的程序入口点，被操作系统直接调用。start被调用后需要进行各种预初始化操作，比如设置堆栈、初始化全局变量、准备命令行参数和环境变量、执行各类初始化函数等等。_start完成自己的任务之后，CRT开始执行各类其他的初始化，最终调用main函数。main函数执行结束后，控制权重新移交给CRT，CRT开始清理工作，如调用全局和静态对象的析构函数，关闭标准输入输出等，并最终调用系统调用结束程序。</p>
-<p>我们可以在命令行中加入-nostartfiles来告诉linker不执行C start routine。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cargo rustc -- -C link-arg=-nostartfiles</span><br></pre></td></tr></table></figure>
+<h2 id="Forwarding-a-matched-fragment-传递匹配片段"><a href="#Forwarding-a-matched-fragment-传递匹配片段" class="headerlink" title="Forwarding a matched fragment 传递匹配片段"></a>Forwarding a matched fragment 传递匹配片段</h2><p>当将一个匹配到的片段传递给macro-by-example时，第二个宏里的matchers将会视传进来的片段为不透明语法树（opaque AST），而不是直接将把传进来的片段字面匹配，只能使用相同类型的指定符。听起来好难懂（有我翻译的问题，但我一开始看原文也理解得挺费劲），看个例子就能理解了。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:expr) =&gt; &#123; bar!($l); &#125;</span><br><span class="line"><span class="comment">// ERROR:               ^^ no rules expected this token in macro call</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
 
+<p>上面这个示例中，如果是“直接将把传进来的片段字面匹配”，那么foo!(3)传进去3，foo!内部调用bar!时传进去3，就可以通过编译了。但是实际上不是这样的，他不管你传进去的符不符合bar!的内部定义，只要foo!里的$l的指定符类型不符合bar!的指定符类型，就会报错。</p>
+<p>这样修改就能通过编译</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="comment">// compiles OK</span></span><br><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:tt) =&gt; &#123; bar!($l); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
 
-<p>当然，更方便地，我们可以在.cargo&#x2F;config.toml文件中加入下列内容：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// /os/.cargo/config.toml</span><br><span class="line"></span><br><span class="line">[target.&#x27;cfg(target_os = &quot;linux&quot;)&#x27;]</span><br><span class="line">rustflags = [&quot;-C&quot;, &quot;link-arg=-nostartfiles&quot;]</span><br></pre></td></tr></table></figure>
+<p>因为标记树tt允许在匹配后直接匹配文字标记3。</p>
+<p>不想写了，剩下的以后再写吧。</p>
+]]></content>
+      <categories>
+        <category>Rust</category>
+      </categories>
+      <tags>
+        <tag>Rust</tag>
+        <tag>Macros</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>String和Int在memory中的储存</title>
+    <url>/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/</url>
+    <content><![CDATA[<p>CS61C的disc3中有一个关于String和Int在内存中储存区别的问题</p>
+<span id="more"></span>
 
-<p>最终成功通过编译。</p>
-<p>代码及配置如下：</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/main.rs</span></span><br><span class="line"><span class="meta">#![no_std]</span></span><br><span class="line"><span class="meta">#![no_main]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">mod</span> lang.items;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span> <span class="comment">// don&#x27;t mangle the name of this function</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">_start</span>() <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="comment">// this function is the entry point, since the linker looks for a function</span></span><br><span class="line">    <span class="comment">// named `_start` by default</span></span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/lang.items.rs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#[panic_handler]</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">panic</span>(_info: &amp;PanicInfo) <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/Cargo.toml:</span></span><br><span class="line"><span class="comment">//添加</span></span><br><span class="line">[profile.dev]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/.cargo/config.toml</span></span><br><span class="line">[build]</span><br><span class="line">target = <span class="string">&quot;x86_64-unknown-linux-gnu&quot;</span></span><br><span class="line"></span><br><span class="line">[target.<span class="symbol">&#x27;cfg</span>(target_os = <span class="string">&quot;linux&quot;</span>)&#x27;]</span><br><span class="line">rustflags = [<span class="string">&quot;-C&quot;</span>, <span class="string">&quot;link-arg=-nostartfiles&quot;</span>]</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">2</span>];</span><br><span class="line"><span class="comment">//storing &#x27;DEAD&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">0x44454144</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//storing &#x27;BEEF&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">0x42454546</span>;</span><br></pre></td></tr></table></figure>
 
-
-
-
-
+<p>问题是Does this C program store ‘DEADBEEF’ in memory the same way as storing it as a string?</p>
+<p>答案表明了，计算机在储存String的时候，无论是大端还是小端，String的最左端的字符都会储存在lowest address；</p>
+<p>然而integers的储存方式取决于系统架构，如果是大端模式，将会比较符合人类直觉地按照’DEADBEEF’储存。而如果是小端模式，将会把最低有效字节储存在低地址部分，就像是，0x44 0x41 0x45 0x44。</p>
 ]]></content>
       <categories>
         <category>self-learning-recording</category>
-        <category>开源操作系统训练营笔记</category>
+        <category>CS61C</category>
       </categories>
       <tags>
-        <tag>OS</tag>
-        <tag>x86</tag>
-        <tag>移除标准库依赖</tag>
+        <tag>计算机组成原理</tag>
+        <tag>C</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>Rust 切片与可修改切片</title>
-    <url>/2024/01/25/Rust%20%E5%88%87%E7%89%87%E4%B8%8E%E5%8F%AF%E4%BF%AE%E6%94%B9%E5%88%87%E7%89%87/</url>
-    <content><![CDATA[<p>rust中切片不可变，可修改切片指的是切片元素可修改，但是切片长度不可改变</p>
-]]></content>
   </entry>
   <entry>
     <title>Rust 调用同名方法</title>
@@ -199,65 +204,6 @@
       </categories>
       <tags>
         <tag>Rust</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>链接脚本(linker scripts)</title>
-    <url>/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/</url>
-    <content><![CDATA[<p>linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。</p>
-<p>如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。</p>
-<span id="more"></span>
-
-<h2 id="链接脚本基本概念"><a href="#链接脚本基本概念" class="headerlink" title="链接脚本基本概念"></a>链接脚本基本概念</h2><p>由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫<strong>input sections</strong>，输出文件的sections叫<strong>output sections</strong>。</p>
-<p>可执行文件的section都拥有自己的名字和大小，大多数sections还会有相应的数据，叫作section contents。</p>
-<p>段可以是<strong>loadable</strong>和<strong>allocatable</strong>的。其中，loadable指在输出文件被执行的时候该段的内容会被加载进内存。<strong>allocatable</strong>指的是没有内容的section，它们对应的区域会在内存中预留位置，但是没有东西会被加载到那里（甚至在有些时候，这部分内存会被直接清掉）。既不是loadable又不是allocatable的段一般情况下会包含一些debugging信息。</p>
-<p>loadable output sections或者allocatable output sections拥有两个地址：<strong>VMA</strong>和<strong>LMA</strong>。</p>
-<p><strong>VMA</strong>（virtual memory address）：output file在执行的时候，section会得到VMA地址。</p>
-<p><strong>LMA</strong>（load memory address）：section在被加载的时候会得到这个地址。</p>
-<p>大多数情况下这两种地址都是相同的，有一种情况二者会有差异：当一部分数据段被加载进ROM，并且在程序运行之际它被拷贝进RAM时，ROM地址会成为LMA，RAM地址会成为VMA。</p>
-<p>每个目标文件都有<strong>symbol table</strong>（包含一系列symbols)。symbol分为<strong>defined symbol</strong>和<strong>undefined symbol</strong>。每一个symbol都有名字，defined symbol还拥有地址。编译C或者C++程序得到目标文件后，每一个defined function、global variable 和 static variable都会拥有defined symbol，而输入文件中引用的undefined function或者global variable会成为undefined symbol。</p>
-<h2 id="链接脚本格式"><a href="#链接脚本格式" class="headerlink" title="链接脚本格式"></a>链接脚本格式</h2><p>链接脚本是文本文件，由一系列指令构成。每一个指令都是一个关键字，可能会附有参数或者对symbol的赋值。分号作为指令的间隔符，空格会被忽略。</p>
-<p>链接脚本里的字符串，如文件或者格式名（format names），可以被直接输入（不加引号）。但是如果文件名里面包括逗号之类的符号，那么还需要用双引号将字符串括起来。文件名里面是不可能包括双引号的。</p>
-<p>注释用&#x2F;**&#x2F;</p>
-<h2 id="一些简单例子"><a href="#一些简单例子" class="headerlink" title="一些简单例子"></a>一些简单例子</h2><p>最简单的链接脚本只有一个指令：’SECTIONS’。’SECTIONS’指令可以用来描述内存在输出文件中的布局。</p>
-<p>这个例子里我们假设你的程序只有代码，初始化数据和未初始化数据。它们将会被分别放在’.text’、’.data’、’.bss’段。我们再假设你的输入文件只有这些sections。</p>
-<p>加入code应该被加载在0x10000地址位，data在0x8000000位置开始。链接脚本如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">	. = 0x10000;</span><br><span class="line">	.text :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.text)</span><br><span class="line">	&#125;</span><br><span class="line">	. = 0x8000000;</span><br><span class="line">	.data :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.data)</span><br><span class="line">	&#125;</span><br><span class="line">	.bss :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.bss)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>‘.’这个特殊symbol是位置计数器（location counter）。如果不用某种方式（后面会讲）特殊指明output section的地址，那么地址就会被设置为位置计数器的当前值。位置计数器按照output section大小来增长。在’SECTIONS’指令的开始位置，位置计数器是’0’。</p>
-<p>第二行定义了output section ‘.text’。冒号是必备语法，现在可以暂时忽略。output section name后的花括号里面列举了需要放进output section的input sections的名字。表达式 “*(.text) “表示所有输入文件中的所有”.text “输入部分。</p>
-<p>由于定义输出部分 <code>.text&#39; 时位置计数器为 </code>0x10000’，链接器将把输出文件中 <code>.text&#39; 部分的地址设置为 </code>0x10000’。</p>
-<p>剩下的几行定义了输出文件的’.data’和’.bss’ sections。链接器将会在’0x8000000’放置’.data’output section。在连接器放置 ‘.data’ output section之后，location counter会被设置为’0x8000000’加上’.data’ output section的大小。然后链接器将会在 ‘.data’ output section 的后面立刻填上’.bss’ output section。</p>
-<p>链接器将确保每个输出部分的对齐方式符合要求，必要时会增加位置计数器。在这个例子里，’.text’ 和 ‘.data’ sections 的指定地址可能会满足任何对齐限制，但链接器可能必须在 ‘.data’ 和 ‘.bss’部分之间创建一个小间隙。</p>
-<h2 id="简单的链接脚本指定"><a href="#简单的链接脚本指定" class="headerlink" title="简单的链接脚本指定"></a>简单的链接脚本指定</h2><p><strong>Entry Point</strong>：设置进入点。</p>
-<p><strong>File Commands</strong>：处理文件的指令。 </p>
-<p><strong>Fomat Commands</strong>：处理目标文件格式的指令。</p>
-<p><strong>Miscellaneous Commands</strong>：其他的链接脚本指令。</p>
-<h3 id="Setting-the-entry-point"><a href="#Setting-the-entry-point" class="headerlink" title="Setting the entry point"></a>Setting the entry point</h3><p>执行程序的第一条指令叫作entry point。你可以使用ENTRY链接脚本指令来设置entry point。</p>
-<p>参数是一个symbol name： ENTRY(symbol)</p>
-<p>设置entry point有几种方法，链接器将会通过依次尝试以下方法来设置entry point，并且在其中一种方法成功后停止。</p>
-<ul>
-<li>‘-e’ 输入命令行选项</li>
-<li>链接脚本里的ENTRY(symbol)命令</li>
-<li><em>start</em> symbol 的值（如果已经定义了）</li>
-<li>‘.text’ section的第一个字节的地址（如果存在的话）</li>
-<li>0地址</li>
-</ul>
-<h3 id="Commands-dealing-with-files"><a href="#Commands-dealing-with-files" class="headerlink" title="Commands dealing with files"></a>Commands dealing with files</h3><p>有以下几种</p>
-<p><strong>INCLUDE <em>filename</em></strong>：</p>
-<p>在此加入链接脚本的文件名。这个文件会在当前目录和使用 -L 选项指定的任何目录中搜索。对INCLUDE的嵌套调用最多10层。</p>
-<p>*<em>INPUT(<em>file, file, …</em>)</em>*</p>
-<p>**INPUT(<em>file file …</em>)**：</p>
-<p>INPUT指令会指示连接器将命名的文件包含在link中，就像它们在命令行中被命名一样。比如说，如果你想在任何链接的时候都将’subr.o’给链接上，但是你又不想每次都在链接命令行里都加上这个文件名字，那你就可以在链接脚本里使用’INPUT(subr.o)’。你还可以在链接脚本里列出所有的input files，然后调用linker的时候再加上个’-T’选项。连接器会先尝试打开当前目录下的文件，如果没找到会在归档库里找。</p>
-<p>*<em>GROUP(<em>file, file, …</em>)</em>*</p>
-<p>**GROUP(<em>file file …</em>)**：</p>
-<p>GROUP命令和INPUT有点像，但是GROUP命令里的所有文件都要是已归档的</p>
-]]></content>
-      <categories>
-        <category>Tools</category>
-      </categories>
-      <tags>
-        <tag>linkerScript</tag>
       </tags>
   </entry>
   <entry>
@@ -473,91 +419,7 @@
       <tags>
         <tag>OS</tag>
         <tag>RISC-V</tag>
-        <tag>特权级</tag>
         <tag>rCore</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Rust Macros | 宏官方文档的理解</title>
-    <url>/2023/10/31/Rust-Macros-%E5%AE%8F%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9A%84%E7%90%86%E8%A7%A3/</url>
-    <content><![CDATA[<h1 id="宏和函数的区别"><a href="#宏和函数的区别" class="headerlink" title="宏和函数的区别"></a>宏和函数的区别</h1><p>宏属于元编程（metaprogramming)。</p>
-<p>宏可以接受不同数量的参数；宏还可以再一个给定类型上实现trait，函数却不可以：trait需要在编译时实现，而函数却时在运行时被调用，宏就没有这种问题，它在编译器翻译代码之前就会展开。</p>
-<p>调用宏之前必须定义它，或者将其引入作用域（用use关键词）。</p>
-<p>宏有个问题就是定义十分复杂，难以阅读、理解和维护。</p>
-<h1 id="Macros-By-Example"><a href="#Macros-By-Example" class="headerlink" title="Macros By Example"></a>Macros By Example</h1><h2 id="syntax"><a href="#syntax" class="headerlink" title="syntax"></a>syntax</h2><p>这种宏定义方式通过使用示例来让编译器知道生成相应的代码。</p>
-<span id="more"></span>
-
-<h3 id="MacroRulesDefinition"><a href="#MacroRulesDefinition" class="headerlink" title="MacroRulesDefinition"></a>MacroRulesDefinition</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span></span><br></pre></td></tr></table></figure>
-
-<p>用这个关键字来定义宏。</p>
-<h3 id="MacroRulesDef"><a href="#MacroRulesDef" class="headerlink" title="MacroRulesDef"></a>MacroRulesDef</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroRules );</span><br><span class="line">|	[ MacroRules ];</span><br><span class="line">|	&#123; MacroRules &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroRules"><a href="#MacroRules" class="headerlink" title="MacroRules"></a>MacroRules</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="title function_ invoke__">MacroRule</span>(; MacroRule)* ;</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroRule"><a href="#MacroRule" class="headerlink" title="MacroRule"></a>MacroRule</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">MacroMatcher =&gt; MacroTranscriber</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroMatcher"><a href="#MacroMatcher" class="headerlink" title="MacroMatcher"></a>MacroMatcher</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	( MacroMatch* )</span><br><span class="line">|	[ MacroMatch* ]</span><br><span class="line">|	&#123; MacroMatch* &#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroMatch"><a href="#MacroMatch" class="headerlink" title="MacroMatch"></a>MacroMatch</h3><p>$和delimiters之外的所有token</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">| MacroMatcher</span><br><span class="line">| $( <span class="title function_ invoke__">IDENTIFIER_OR_KERYWORD</span>(不包括<span class="keyword">crate</span>) | RAW_IDENTIFIER | _ ): MacroFragSpec</span><br><span class="line">| $( MacroMatch+ ) MacroRepSep? MacroRepOp</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroFragSpec"><a href="#MacroFragSpec" class="headerlink" title="MacroFragSpec"></a>MacroFragSpec</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">	block | expr | ident | item | lifetime | literal </span><br><span class="line">|	meta | pat | pat_param | path |stmt | tt | ty | vis</span><br></pre></td></tr></table></figure>
-
-<h3 id="MacroRepSep"><a href="#MacroRepSep" class="headerlink" title="MacroRepSep"></a>MacroRepSep</h3><p>delimiters和MacroRepOp以外的所有token</p>
-<h3 id="MacroRepOp"><a href="#MacroRepOp" class="headerlink" title="MacroRepOp"></a>MacroRepOp</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">* | + | ?</span><br></pre></td></tr></table></figure>
-
-
-
-<p>每个宏都有一个名字，有一至多条rule。</p>
-<p>每个Rule都分为两个部分<strong>matcher</strong>和<strong>transcriber</strong>:</p>
-<p>matcher用来描述他将要匹配的部分的格式，transcriber用来描述成功匹配后将会如何替换原文本。matcher和transcriber都必须被delimiters包裹。</p>
-<p>宏可以扩展至表达式、语句、items（项，包括traits、impls、foreign items）、类型或模式。</p>
-<h2 id="Transcribing"><a href="#Transcribing" class="headerlink" title="Transcribing"></a>Transcribing</h2><p>在这里官方文档举了个例子，看了半天才明白。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
-
-<p>这里为什么会error呢？</p>
-<p>实际上，当一个宏被调用的时候，macro expander会根据名字查找对应宏，然后按照顺序依次尝试匹配macro rule，他会尝试填入第一个成功的匹配，宏的匹配过程是没有lookahead的，所以有时候会造成歧义。如果编译器出现没有明确决定如何parse tokens的时刻，会立即报错。如果遇到error，后面的匹配也不会看了。</p>
-<p>就比如上面那个例子，error被填入$($i:ident)*后，再遇到$j:ident，编译器会一时不知道如何parse，它没有lookahead功能，所以就报错了。把最后一句替换成</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!(error error); <span class="comment">// Error: local ambiguity</span></span><br></pre></td></tr></table></figure>
-
-<p>也会照样报错。</p>
-<p>但如果换成下面的代码则可以通过编译。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">    ($($i:ident)* $j:ident) =&gt; &#123; &#125;;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity!(error); </span><br></pre></td></tr></table></figure>
-
-<p>说明这种歧义编译器无法检查到，只能在运行时发现。</p>
-<p>还有一点就是，$在宏中的作用是出发宏引擎（macros engine）的特殊行为，没有被$指定的token会被字面（literally）匹配并转录（transcribe），例如</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)* <span class="number">1</span>) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error <span class="number">1</span>]; <span class="comment">//这里1换成其他东西就会报错</span></span><br></pre></td></tr></table></figure>
-
-<p>例外的是，最外层的delimiters可以匹配成任何的delimiters。比如</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ([$($i:ident)*]) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![[error]]; </span><br><span class="line">ambiguity!([error]); </span><br></pre></td></tr></table></figure>
-
-<p>对ambiguity!的两次调用都是合法的，但是下面这个调用会报错。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line">ambiguity!((error)); <span class="comment">//Error</span></span><br></pre></td></tr></table></figure>
-
-<p>这样也可以</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($i:ident)*) =&gt; &#123; &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ambiguity![error]; <span class="comment">//OK!</span></span><br><span class="line">ambiguity!(error); <span class="comment">//OK!</span></span><br></pre></td></tr></table></figure>
-
-<p>还有一件事，$不能被匹配或者被转录，”$$”是不合法的。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> ambiguity &#123;</span><br><span class="line">    ($($$:ident)*) =&gt; &#123; &#125;; <span class="comment">// Error!</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2 id="Forwarding-a-matched-fragment-传递匹配片段"><a href="#Forwarding-a-matched-fragment-传递匹配片段" class="headerlink" title="Forwarding a matched fragment 传递匹配片段"></a>Forwarding a matched fragment 传递匹配片段</h2><p>当将一个匹配到的片段传递给macro-by-example时，第二个宏里的matchers将会视传进来的片段为不透明语法树（opaque AST），而不是直接将把传进来的片段字面匹配，只能使用相同类型的指定符。听起来好难懂（有我翻译的问题，但我一开始看原文也理解得挺费劲），看个例子就能理解了。</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:expr) =&gt; &#123; bar!($l); &#125;</span><br><span class="line"><span class="comment">// ERROR:               ^^ no rules expected this token in macro call</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
-
-<p>上面这个示例中，如果是“直接将把传进来的片段字面匹配”，那么foo!(3)传进去3，foo!内部调用bar!时传进去3，就可以通过编译了。但是实际上不是这样的，他不管你传进去的符不符合bar!的内部定义，只要foo!里的$l的指定符类型不符合bar!的指定符类型，就会报错。</p>
-<p>这样修改就能通过编译</p>
-<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="comment">// compiles OK</span></span><br><span class="line"><span class="built_in">macro_rules!</span> foo &#123;</span><br><span class="line">    ($l:tt) =&gt; &#123; bar!($l); &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">macro_rules!</span> bar &#123;</span><br><span class="line">    (<span class="number">3</span>) =&gt; &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">foo!(<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
-
-<p>因为标记树tt允许在匹配后直接匹配文字标记3。</p>
-<p>不想写了，剩下的以后再写吧。</p>
-]]></content>
-      <categories>
-        <category>Rust</category>
-      </categories>
-      <tags>
-        <tag>Rust</tag>
-        <tag>Macros</tag>
       </tags>
   </entry>
   <entry>
@@ -599,16 +461,109 @@
       </tags>
   </entry>
   <entry>
-    <title>API与ABI</title>
-    <url>/2023/10/29/API%E4%B8%8EABI/</url>
-    <content><![CDATA[<p>ABI(Application Binary Interface)与API(Application Programming Interface)</p>
-<p>二者都是规定的协议，只不过维度不同。API是编程级的概念，ABI是二进制级的概念。前者包括编程中的函数、网络请求等，后者规定了诸如底层上函数的调用规则、变量的存储方式、堆栈的分布方式等等。</p>
+    <title>链接脚本(linker scripts)</title>
+    <url>/2023/11/15/%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AC-linker-scripts/</url>
+    <content><![CDATA[<p>linker scripts（链接脚本）是一种控制输入、输出文件之间段（sections）的映射关系和控制输出文件内存分布的脚本，它主要由linker command language编写。</p>
+<p>如果不编写自己的链接脚本，那么linker会用默认脚本进行编译。</p>
 <span id="more"></span>
 
-<p>API相同时ABI可能也不兼容，像是C语言在不同机器上调用，之前编译得到的二进制码的ABI不符合现在机器的ABI，所以需要重新编译。又比如说，两份C语言写成的代码文件，分别用不同的编译器进行编译，能够将他们链接在一起吗？这就取决于两个编译器的ABI是否相同，换言之就是以下内容是否遵守：采用同样的目标文件格式、拥有同样的符号修饰标准、变量的内存分布方式相同、函数的调用方式相同等等。</p>
-<p>以下课本原文：</p>
-<p><em>应用程序二进制接口 ABI 是不同二进制代码片段的连接纽带。ABI 定义了二进制机器代码级别的规则，主要包括基本数据类型、通用寄存器的使用、参数的传递规则、以及堆栈的使用等等。ABI 与处理器和内存地址等硬件架构相关，是用来约束链接器 (Linker) 和汇编器 (Assembler) 的。在同一处理器下，基于不同高级语言编写的应用程序、库和操作系统，如果遵循同样的 ABI 定义，那么它们就能正确链接和执行。</em></p>
-<p><em>应用程序编程接口 API 是不同源代码片段的连接纽带。API 定义了一个源码级（如 C 语言）函数的参数，参数的类型，函数的返回值等。因此 API 是用来约束编译器 (Compiler) 的：一个 API 是给编译器的一些指令，它规定了源代码可以做以及不可以做哪些事。API 与编程语言相关，如 libc 是基于 C 语言编写的标准库，那么基于 C 的应用程序就可以通过编译器建立与 libc 的联系，并能在运行中正确访问 libc 中的函数。</em></p>
+<h2 id="链接脚本基本概念"><a href="#链接脚本基本概念" class="headerlink" title="链接脚本基本概念"></a>链接脚本基本概念</h2><p>由于目标文件和可执行文件在格式上的相似性，为了方便叙述，在本文中可执行文件也被统称为目标文件。输入文件的sections叫<strong>input sections</strong>，输出文件的sections叫<strong>output sections</strong>。</p>
+<p>可执行文件的section都拥有自己的名字和大小，大多数sections还会有相应的数据，叫作section contents。</p>
+<p>段可以是<strong>loadable</strong>和<strong>allocatable</strong>的。其中，loadable指在输出文件被执行的时候该段的内容会被加载进内存。<strong>allocatable</strong>指的是没有内容的section，它们对应的区域会在内存中预留位置，但是没有东西会被加载到那里（甚至在有些时候，这部分内存会被直接清掉）。既不是loadable又不是allocatable的段一般情况下会包含一些debugging信息。</p>
+<p>loadable output sections或者allocatable output sections拥有两个地址：<strong>VMA</strong>和<strong>LMA</strong>。</p>
+<p><strong>VMA</strong>（virtual memory address）：output file在执行的时候，section会得到VMA地址。</p>
+<p><strong>LMA</strong>（load memory address）：section在被加载的时候会得到这个地址。</p>
+<p>大多数情况下这两种地址都是相同的，有一种情况二者会有差异：当一部分数据段被加载进ROM，并且在程序运行之际它被拷贝进RAM时，ROM地址会成为LMA，RAM地址会成为VMA。</p>
+<p>每个目标文件都有<strong>symbol table</strong>（包含一系列symbols)。symbol分为<strong>defined symbol</strong>和<strong>undefined symbol</strong>。每一个symbol都有名字，defined symbol还拥有地址。编译C或者C++程序得到目标文件后，每一个defined function、global variable 和 static variable都会拥有defined symbol，而输入文件中引用的undefined function或者global variable会成为undefined symbol。</p>
+<h2 id="链接脚本格式"><a href="#链接脚本格式" class="headerlink" title="链接脚本格式"></a>链接脚本格式</h2><p>链接脚本是文本文件，由一系列指令构成。每一个指令都是一个关键字，可能会附有参数或者对symbol的赋值。分号作为指令的间隔符，空格会被忽略。</p>
+<p>链接脚本里的字符串，如文件或者格式名（format names），可以被直接输入（不加引号）。但是如果文件名里面包括逗号之类的符号，那么还需要用双引号将字符串括起来。文件名里面是不可能包括双引号的。</p>
+<p>注释用&#x2F;**&#x2F;</p>
+<h2 id="一些简单例子"><a href="#一些简单例子" class="headerlink" title="一些简单例子"></a>一些简单例子</h2><p>最简单的链接脚本只有一个指令：’SECTIONS’。’SECTIONS’指令可以用来描述内存在输出文件中的布局。</p>
+<p>这个例子里我们假设你的程序只有代码，初始化数据和未初始化数据。它们将会被分别放在’.text’、’.data’、’.bss’段。我们再假设你的输入文件只有这些sections。</p>
+<p>加入code应该被加载在0x10000地址位，data在0x8000000位置开始。链接脚本如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">	. = 0x10000;</span><br><span class="line">	.text :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.text)</span><br><span class="line">	&#125;</span><br><span class="line">	. = 0x8000000;</span><br><span class="line">	.data :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.data)</span><br><span class="line">	&#125;</span><br><span class="line">	.bss :</span><br><span class="line">	&#123;</span><br><span class="line">		*(.bss)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>‘.’这个特殊symbol是位置计数器（location counter）。如果不用某种方式（后面会讲）特殊指明output section的地址，那么地址就会被设置为位置计数器的当前值。位置计数器按照output section大小来增长。在’SECTIONS’指令的开始位置，位置计数器是’0’。</p>
+<p>第二行定义了output section ‘.text’。冒号是必备语法，现在可以暂时忽略。output section name后的花括号里面列举了需要放进output section的input sections的名字。表达式 “*(.text) “表示所有输入文件中的所有”.text “输入部分。</p>
+<p>由于定义输出部分 <code>.text&#39; 时位置计数器为 </code>0x10000’，链接器将把输出文件中 <code>.text&#39; 部分的地址设置为 </code>0x10000’。</p>
+<p>剩下的几行定义了输出文件的’.data’和’.bss’ sections。链接器将会在’0x8000000’放置’.data’output section。在连接器放置 ‘.data’ output section之后，location counter会被设置为’0x8000000’加上’.data’ output section的大小。然后链接器将会在 ‘.data’ output section 的后面立刻填上’.bss’ output section。</p>
+<p>链接器将确保每个输出部分的对齐方式符合要求，必要时会增加位置计数器。在这个例子里，’.text’ 和 ‘.data’ sections 的指定地址可能会满足任何对齐限制，但链接器可能必须在 ‘.data’ 和 ‘.bss’部分之间创建一个小间隙。</p>
+<h2 id="简单的链接脚本指定"><a href="#简单的链接脚本指定" class="headerlink" title="简单的链接脚本指定"></a>简单的链接脚本指定</h2><p><strong>Entry Point</strong>：设置进入点。</p>
+<p><strong>File Commands</strong>：处理文件的指令。 </p>
+<p><strong>Fomat Commands</strong>：处理目标文件格式的指令。</p>
+<p><strong>Miscellaneous Commands</strong>：其他的链接脚本指令。</p>
+<h3 id="Setting-the-entry-point"><a href="#Setting-the-entry-point" class="headerlink" title="Setting the entry point"></a>Setting the entry point</h3><p>执行程序的第一条指令叫作entry point。你可以使用ENTRY链接脚本指令来设置entry point。</p>
+<p>参数是一个symbol name： ENTRY(symbol)</p>
+<p>设置entry point有几种方法，链接器将会通过依次尝试以下方法来设置entry point，并且在其中一种方法成功后停止。</p>
+<ul>
+<li>‘-e’ 输入命令行选项</li>
+<li>链接脚本里的ENTRY(symbol)命令</li>
+<li><em>start</em> symbol 的值（如果已经定义了）</li>
+<li>‘.text’ section的第一个字节的地址（如果存在的话）</li>
+<li>0地址</li>
+</ul>
+<h3 id="Commands-dealing-with-files"><a href="#Commands-dealing-with-files" class="headerlink" title="Commands dealing with files"></a>Commands dealing with files</h3><p>有以下几种</p>
+<p><strong>INCLUDE <em>filename</em></strong>：</p>
+<p>在此加入链接脚本的文件名。这个文件会在当前目录和使用 -L 选项指定的任何目录中搜索。对INCLUDE的嵌套调用最多10层。</p>
+<p>*<em>INPUT(<em>file, file, …</em>)</em>*</p>
+<p>**INPUT(<em>file file …</em>)**：</p>
+<p>INPUT指令会指示连接器将命名的文件包含在link中，就像它们在命令行中被命名一样。比如说，如果你想在任何链接的时候都将’subr.o’给链接上，但是你又不想每次都在链接命令行里都加上这个文件名字，那你就可以在链接脚本里使用’INPUT(subr.o)’。你还可以在链接脚本里列出所有的input files，然后调用linker的时候再加上个’-T’选项。连接器会先尝试打开当前目录下的文件，如果没找到会在归档库里找。</p>
+<p>*<em>GROUP(<em>file, file, …</em>)</em>*</p>
+<p>**GROUP(<em>file file …</em>)**：</p>
+<p>GROUP命令和INPUT有点像，但是GROUP命令里的所有文件都要是已归档的</p>
+]]></content>
+      <categories>
+        <category>Tools</category>
+      </categories>
+      <tags>
+        <tag>linkerScript</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Rust 切片与可修改切片</title>
+    <url>/2024/01/25/Rust%20%E5%88%87%E7%89%87%E4%B8%8E%E5%8F%AF%E4%BF%AE%E6%94%B9%E5%88%87%E7%89%87/</url>
+    <content><![CDATA[<p>rust中切片不可变，可修改切片指的是切片元素可修改，但是切片长度不可改变</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>在x86_64平台上移除标准库依赖</title>
+    <url>/2024/03/10/%E5%9C%A8x86-64%E5%B9%B3%E5%8F%B0%E4%B8%8A%E7%A7%BB%E9%99%A4%E6%A0%87%E5%87%86%E5%BA%93%E4%BE%9D%E8%B5%96/</url>
+    <content><![CDATA[<p>尝试了一下在x86_64平台移除标准库依赖<span id="more"></span>，如果只是单纯地将config文件中的target修改为”x86_64-unknown-linux-gnu”将会有以下报错信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">error: language item required, but not found: `eh_personality`</span><br><span class="line">  |</span><br><span class="line">  = note: this can occur when a binary crate with `#![no_std]` is compiled for a target where `eh_personality` is defined in the standard library</span><br><span class="line">  = help: you may be able to compile for a target that doesn&#x27;t need `eh_personality`, specify a target with `--target` or in `.cargo/config`</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to previous error</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="eh-personality"><a href="#eh-personality" class="headerlink" title="eh_personality"></a>eh_personality</h1><p>报错信息中的eh_personality是一种lang item，它在stack unwinding过程中标记了一种函数。首先我们要知道什么是lang item。lang item(language item)是编译器内部需要的一种特殊函数和类型，比如说’Copy’ trait，它会告诉编译器哪些类型有复制语义（Copy semantics）。在应用中，#[lang &#x3D; “copy”]就定义了copy是一种lang item。</p>
+<h2 id="Exception-Handling"><a href="#Exception-Handling" class="headerlink" title="Exception Handling"></a>Exception Handling</h2><p>Exception Handling主要分为两个阶段，search phase和cleanup phase。在这两个阶段unwinder会利用当前处理模块（这里指的是OS模块，也就是可执行文件或者动态库）来对帧栈进行从头至尾的扫描。而对于每一个帧栈，unwinder会利用”personality routine”(它的地址存放在unwind section中)<br>然后了解eh_personality的作用，在rust库中解释为stack unwinding过程中的一个lang item，这里插入一下exception handling的过程：</p>
+<h3 id="search-phase"><a href="#search-phase" class="headerlink" title="search phase"></a>search phase</h3><p>“personality routine”会检查被抛出的异常，决定是否在此帧栈catch该异常。</p>
+<h3 id="cleanup-phase"><a href="#cleanup-phase" class="headerlink" title="cleanup phase"></a>cleanup phase</h3><p>unwinder会再次调用各个personality routine，在这个阶段personality routine的作用是决定是否要运行cleanup code。如果运行，unwinder控制权会转交给函数体内部的特殊分支–”landing pad”，它会调用析构函数、释放内存,etc。最后控制权回到unwinder，unwinder继续之前的工作。</p>
+<p>eh_persionality就是上面所说的personality routine。综上我们知道，报错信息中显示”not found ‘eh_personality’”，是因为eh_personality需要操作系统特定的lib，而我们正在从头编写OS，意味着我们将要避免使用任何OS提供的服务或库。这里我们采取的方案是不进行unwind。</p>
+<p>在Cargo.toml中加入以下内容，就可以将panic的应对方式改为abort。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[profile.dev]</span><br><span class="line">panic = &quot;abort&quot;</span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = &quot;abort&quot;</span><br></pre></td></tr></table></figure>
+
+<h1 id="Linker-error"><a href="#Linker-error" class="headerlink" title="Linker error"></a>Linker error</h1><p>但修改后又会遇到报错：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">error: linking with `cc` failed: exit status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start&#x27;:</span><br><span class="line">          (.text+0x16): undefined reference to `__libc_csu_fini&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x1d): undefined reference to `__libc_csu_init&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x24): undefined reference to `main&#x27;</span><br><span class="line">          /usr/bin/ld: (.text+0x2a): undefined reference to `__libc_start_main&#x27;</span><br><span class="line">          collect2: error: ld returned 1 exit status</span><br><span class="line">          </span><br><span class="line">  = note: some `extern` functions couldn&#x27;t be found; some native libraries may need to be installed or have their path specified</span><br><span class="line">  = note: use the `-l` flag to specify native libraries to link</span><br><span class="line">  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)</span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin &quot;os&quot;) due to 1 previous error</span><br></pre></td></tr></table></figure>
+
+
+
+<p>以上报错信息显示出现了<strong>linker error</strong>，linker的作用是将generated code链接为可执行文件，而各类操作系统的链接方法都不尽相同，所以linker和linker error也会随着操作系统不同发生差异。</p>
+<p>再仔细看报错信息，在函数**’_start’**中我们缺少启动文件。这里我查阅资料后粗略了解了一下_start和C运行时(C runtime)之间的关系。</p>
+<h2 id="start和C运行时-C-runtime"><a href="#start和C运行时-C-runtime" class="headerlink" title="_start和C运行时(C runtime)"></a>_start和C运行时(C runtime)</h2><p>start是比main()更接近底层的程序入口点，被操作系统直接调用。start被调用后需要进行各种预初始化操作，比如设置堆栈、初始化全局变量、准备命令行参数和环境变量、执行各类初始化函数等等。_start完成自己的任务之后，CRT开始执行各类其他的初始化，最终调用main函数。main函数执行结束后，控制权重新移交给CRT，CRT开始清理工作，如调用全局和静态对象的析构函数，关闭标准输入输出等，并最终调用系统调用结束程序。</p>
+<p>我们可以在命令行中加入-nostartfiles来告诉linker不执行C start routine。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">cargo rustc -- -C link-arg=-nostartfiles</span><br></pre></td></tr></table></figure>
+
+
+<p>当然，更方便地，我们可以在.cargo&#x2F;config.toml文件中加入下列内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">// /os/.cargo/config.toml</span><br><span class="line"></span><br><span class="line">[target.&#x27;cfg(target_os = &quot;linux&quot;)&#x27;]</span><br><span class="line">rustflags = [&quot;-C&quot;, &quot;link-arg=-nostartfiles&quot;]</span><br></pre></td></tr></table></figure>
+
+<p>最终成功通过编译。</p>
+<p>代码及配置如下：</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/main.rs</span></span><br><span class="line"><span class="meta">#![no_std]</span></span><br><span class="line"><span class="meta">#![no_main]</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">mod</span> lang.items;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[no_mangle]</span> <span class="comment">// don&#x27;t mangle the name of this function</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> <span class="keyword">fn</span> <span class="title function_">_start</span>() <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="comment">// this function is the entry point, since the linker looks for a function</span></span><br><span class="line">    <span class="comment">// named `_start` by default</span></span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/lang.items.rs</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#[panic_handler]</span></span><br><span class="line"><span class="keyword">fn</span> <span class="title function_">panic</span>(_info: &amp;PanicInfo) <span class="punctuation">-&gt;</span> ! &#123;</span><br><span class="line">    <span class="keyword">loop</span> &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// os/Cargo.toml:</span></span><br><span class="line"><span class="comment">//添加</span></span><br><span class="line">[profile.dev]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line">[profile.release]</span><br><span class="line">panic = <span class="string">&quot;abort&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// os/.cargo/config.toml</span></span><br><span class="line">[build]</span><br><span class="line">target = <span class="string">&quot;x86_64-unknown-linux-gnu&quot;</span></span><br><span class="line"></span><br><span class="line">[target.<span class="symbol">&#x27;cfg</span>(target_os = <span class="string">&quot;linux&quot;</span>)&#x27;]</span><br><span class="line">rustflags = [<span class="string">&quot;-C&quot;</span>, <span class="string">&quot;link-arg=-nostartfiles&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+
+
+
 ]]></content>
       <categories>
         <category>self-learning-recording</category>
@@ -616,75 +571,118 @@
       </categories>
       <tags>
         <tag>OS</tag>
+        <tag>x86</tag>
       </tags>
   </entry>
   <entry>
-    <title>RISCV和MIPS的汇编指令的区别</title>
-    <url>/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/</url>
-    <content><![CDATA[<p>RISC-V和MIPS在汇编指令方面存在一定的区别。</p>
+    <title>MakeFile学习笔记</title>
+    <url>/2024/03/21/MakeFile%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
+    <content><![CDATA[<h1 id="GNU-Make"><a href="#GNU-Make" class="headerlink" title="GNU Make"></a>GNU Make</h1><h2 id="Make的用途"><a href="#Make的用途" class="headerlink" title="Make的用途"></a>Make的用途</h2><ol>
+<li>供其他用户构建和安装我们的package，只需一个make命令就可以完成复杂的行为。</li>
+<li>Make可以自动检测到需要更新的文件，文件更新顺序也可以根据依赖关系自动决定。所以在更改了一部分源文件之后可以不把所有文件重编译，make会只编译改动过的源文件和一些依赖的源文件。</li>
+<li>make支持很多语言。</li>
+<li>make可以建包，安装卸载包，生成包的标签等等。</li>
+</ol>
 <span id="more"></span>
 
-<h3 id="在指令类型方面"><a href="#在指令类型方面" class="headerlink" title="在指令类型方面"></a>在指令类型方面</h3><h4 id="RISCV分为R-type、I-type、J-type和S-type等"><a href="#RISCV分为R-type、I-type、J-type和S-type等" class="headerlink" title="RISCV分为R-type、I-type、J-type和S-type等"></a>RISCV分为R-type、I-type、J-type和S-type等</h4><p>R-type(add etc)</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/R-type-format.png"></p>
-<p>I-type(addi、beq、ld etc)</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020191816122.png" alt="image-20231020191816122"></p>
-<p>S-type(sd etc)</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020192654393.png" alt="image-20231020192654393"></p>
-<h4 id="MIPS分为R-type、I-type、J-type（只有这三种）"><a href="#MIPS分为R-type、I-type、J-type（只有这三种）" class="headerlink" title="MIPS分为R-type、I-type、J-type（只有这三种）"></a>MIPS分为R-type、I-type、J-type（只有这三种）</h4><p>R-type</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L20wXzU3NDQ2Mjg0,size_16,color_FFFFFF,t_70.png" alt="img"></p>
-<p>I-type</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
-<p>J-type</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515172043999.png" alt="img"></p>
-<p>MIPS是没有S-type的！store word指令属于I-type。</p>
-<h3 id="指令格式-instruction-format-和汇编指令中寄存器的相对位置"><a href="#指令格式-instruction-format-和汇编指令中寄存器的相对位置" class="headerlink" title="指令格式(instruction format)和汇编指令中寄存器的相对位置"></a>指令格式(instruction format)和汇编指令中寄存器的相对位置</h3><p>RISCV的机器码format的寄存器相对位置和汇编指令的相对位置是相同的，比如：R-type中，指令格式为先目标寄存器(rs1、rs2)后源寄存器(rd)，和汇编的顺序相同</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add x9, x20, x21</span><br></pre></td></tr></table></figure>
+<h2 id="TODO阅读大型项目"><a href="#TODO阅读大型项目" class="headerlink" title="TODO阅读大型项目"></a>TODO阅读大型项目</h2><p>阅读大型项目的一个入手点就是先阅读MakeFile文件，了解到编译依赖、项目结构等等。</p>
+<h2 id="Makefile的规格"><a href="#Makefile的规格" class="headerlink" title="Makefile的规格"></a>Makefile的规格</h2><figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">target ...    : prerequisites(依赖) ...</span><br><span class="line">	   recipe(命令)</span><br><span class="line">	   ...</span><br><span class="line">	   ...</span><br></pre></td></tr></table></figure>
 
-<p>代表着将x21和x20内的数据相加存进x9中，这段汇编指令的对应字段值是</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194223559.png" alt="image-20231020194223559"></p>
-<p>MIPS却是不同的，比如：R-type中，指令格式为先源寄存器(rs、rt)后目标寄存器(rd)，和汇编的顺序相反（但是两个源寄存器的相对位置是相同的，都是先rs再rt）。</p>
-<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">add $s0, $s1, $s2 #s1存17、s2存18、s0存16</span><br></pre></td></tr></table></figure>
+<p>例子：</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br><span class="line">		</span><br></pre></td></tr></table></figure>
 
-<p>这段汇编指令的对应字段值是</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020194443779.png" alt="image-20231020194443779"></p>
-<h5 id="RISCV对于立即数指令的推断能力"><a href="#RISCV对于立即数指令的推断能力" class="headerlink" title="RISCV对于立即数指令的推断能力"></a>RISCV对于立即数指令的推断能力</h5><p>在RISC-V中，当处理常数时，程序员无需明确使用“addi”指令；相反，他们可以简单地写“add”，汇编器将根据操作数是全部寄存器（R型）还是其中一个是常数（I型），生成适当的操作码和指令格式。在RISC-V中对不同操作码和格式使用明确的名称旨在在引入汇编语言时相对于机器语言减少混淆。</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/image-20231020200008385.png" alt="image-20231020200008385"></p>
-<p>MIPS是否有这种功能不太清楚，实际上RISCV的这种能力在互联网上也查不到。</p>
-<h3 id="immediate的格式"><a href="#immediate的格式" class="headerlink" title="immediate的格式"></a>immediate的格式</h3><p>MIPS的instruction format中立即数是一体的、不分离的。</p>
-<p>而RISCV中I-type的立即数被截断为两部分，5 bits和7bits，5bits靠近op，7 bits在尾部。这种设计是为了让所有类型的指令中funct3的位置相同（便于硬件的设计）。</p>
-<p>计算这两段fields时，可以将立即数除2^5，商为5 bits部分，余数为7 bits部分。</p>
-<p><img src="/2023/10/20/RISCV%E4%B8%8EMIPS%E7%9A%84%E6%B1%87%E7%BC%96%E6%8C%87%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB/20210515165800755.png" alt="img"></p>
+<h3 id="默认目标"><a href="#默认目标" class="headerlink" title="默认目标"></a>默认目标</h3><p>在Makefile中，当执行<code>make</code>命令而不带任何参数时，<code>make</code>工具默认尝试构建第一个目标，这个目标被称为默认目标,也就是这里的<code>hello</code>。</p>
+<p><code>hello</code>依赖于<code>hello.o</code>，如果<code>hello.o</code>是最新的，那么<code>make</code>会直接执行<code>gcc -c hello hello.o</code>；如果不是，那么会寻找依赖目标。递归进行上述操作。最后自动调整命令执行的顺序再执行命令。</p>
+<p>在这里<code>clean</code>不是默认目标，必须要手动执行<code>make clean</code>时才会被调用。</p>
+<h3 id="PHONY-伪目标"><a href="#PHONY-伪目标" class="headerlink" title=".PHONY(伪目标)"></a>.PHONY(伪目标)</h3><p>如果我们的目录里存在一个名为<code>clean</code>的文件，make会认为目标<code>clean</code>已经是最新的，不需要再执行了，为了避免此情况我们需要在makefile的clean上一行加入<code>.PHONY</code>，那样<code>make</code>就会无视是否存在<code>clean</code>文件了。</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line"><span class="meta"><span class="keyword">.PHONY</span>: clean</span></span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
+
+<h3 id="设置默认目标"><a href="#设置默认目标" class="headerlink" title="设置默认目标"></a>设置默认目标</h3><figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">.DEFALT_GOAL = clean</span><br><span class="line"><span class="section">hello: hello.o</span></span><br><span class="line">	gcc -o hello hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">hello.o: hello.c</span></span><br><span class="line">	gcc -c hello -o hello.o</span><br><span class="line">	</span><br><span class="line"><span class="section">clean: </span></span><br><span class="line">	rm hello</span><br><span class="line">	rm hello.o</span><br></pre></td></tr></table></figure>
+
+<p>看例子就懂，原来的<code>hello</code>就不是默认目标了。</p>
+<h1 id="待更新"><a href="#待更新" class="headerlink" title="待更新"></a>待更新</h1>]]></content>
+      <categories>
+        <category>Tools</category>
+      </categories>
+      <tags>
+        <tag>MakeFile</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>hexo next配置</title>
+    <url>/2024/03/21/hexo-next%E9%85%8D%E7%BD%AE/</url>
+    <content><![CDATA[<h1 id="文字颜色"><a href="#文字颜色" class="headerlink" title="文字颜色"></a>文字颜色</h1><p>文件Blog\themes\next\source\css_variables\Pisces.styl中可以修改文字颜色等。</p>
+<p>如sidebar的颜色</p>
+<figure class="highlight stylus"><table><tr><td class="code"><pre><span class="line"><span class="comment">// Sidebar</span></span><br><span class="line"><span class="comment">// --------------------------------------------------</span></span><br><span class="line"><span class="variable">$sidebar</span>-nav-<span class="attribute">color</span>                = <span class="built_in">var</span>(--text-color);</span><br><span class="line"><span class="variable">$sidebar</span>-nav-hover-<span class="attribute">color</span>          = <span class="number">#475F99</span>;</span><br><span class="line"><span class="variable">$sidebar</span>-highlight                = <span class="number">#475F99</span>;</span><br></pre></td></tr></table></figure>
+
+]]></content>
+      <tags>
+        <tag>hexo</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>rCore | 第二章批处理系统 记录</title>
+    <url>/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/</url>
+    <content><![CDATA[<p>希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。</p>
+<span id="more"></span>
+
+<p>这一章加入了特权级机制，主要有两个方面：内核和应用分布在内存的不同部分，进行物理隔离；内核态拥有特殊的寄存器。<br>但由于是batch system，我们的应用程序将被加载到内存同一起始位置覆盖而进行轮流执行。</p>
+<h1 id="内核"><a href="#内核" class="headerlink" title="内核"></a>内核</h1><h2 id="任务管理器AppManager"><a href="#任务管理器AppManager" class="headerlink" title="任务管理器AppManager"></a>任务管理器AppManager</h2><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="keyword">struct</span> <span class="title class_">AppManager</span> &#123;</span><br><span class="line">    num_app: <span class="type">usize</span>,</span><br><span class="line">    current_app: <span class="type">usize</span>,</span><br><span class="line">    app_start: [<span class="type">usize</span>; MAX_APP_NUM + <span class="number">1</span>],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AppManager的关键功能是load_app，它的实现逻辑是删除从app起始地址（0x80400000）开始的一段内存，再从app list中获取所需的app code切片，将其copy到0x80400000。最重要的一步是执行指令fence.i。</p>
+<h3 id="fence-i"><a href="#fence-i" class="headerlink" title="fence.i"></a>fence.i</h3><p>指导书中对fence.i的解释是及时刷新i-cache中的内容，防止取指结果不是最新的。这部分内容和我在网上查阅的资料有一点点出入，搜索结果并没有找到fence.i和i-cache的关系，但也有可能是我学识浅薄，没有看出它们的直接联系。</p>
+<p>网上查阅结果表明RISC-V采用relaxed memory model（松散内存模型），这种内存模型可以改变指令执行顺序来提升处理器性能。fence.i的作用是让该指令之前的所有汇编指令都发生在fence.i之后的指令之前。这个指导书中的原文“ <em>它的功能是保证 在它之后的取指过程必须能够看到在它之前的所有对于取指内存区域的修改</em> ”相符。这样就可以在松散内存模型下保证指令的正确执行顺序，确保数据一致性和程序的正确同步。</p>
+<h2 id="Trap处理"><a href="#Trap处理" class="headerlink" title="Trap处理"></a>Trap处理</h2><h3 id="TrapContext"><a href="#TrapContext" class="headerlink" title="TrapContext"></a>TrapContext</h3><figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(C)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">TrapContext</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> x: [<span class="type">usize</span>; <span class="number">32</span>],</span><br><span class="line">    <span class="keyword">pub</span> sstatus: Sstatus,</span><br><span class="line">    <span class="keyword">pub</span> sepc: <span class="type">usize</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>x保存通用寄存器。<code>x10~x17</code> 保存函数参数，<code>x17(a7)</code> 保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数 <code>__alltraps</code> 中需要保存 <code>x1</code>、<code>x3 </code>、<code>x4(sp)</code> 和 <code>x5~x31</code> 。sstatus保存Trap之前CPU处于哪个特权级。</p>
+<p>sepc保存当Trap是异常时，保存Trap之前执行的最后一条指令的地址。</p>
+<h2 id="usize切片和u8切片（app的加载与清除）"><a href="#usize切片和u8切片（app的加载与清除）" class="headerlink" title="usize切片和u8切片（app的加载与清除）"></a>usize切片和u8切片（app的加载与清除）</h2><p>usize大小适配当前平台，一般为32或64，所以极为适合当作指针。<br>u8就是字节，可以用字节切片来清除和加载程序。</p>
+<p>写程序时不打细心，u8用成usize了，切片长度却没有改变，就报错了，排查了好半天。</p>
+<h1 id="内核栈和用户栈的设置"><a href="#内核栈和用户栈的设置" class="headerlink" title="内核栈和用户栈的设置"></a>内核栈和用户栈的设置</h1><p>这里采用static结构体变量来设置内核栈和用户栈，它们在内存中的具体由rust代码决定。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> KERNEL_STACK: KernelStack = Kernel Statck &#123;</span><br><span class="line">    data: [<span class="number">0</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> USER_STACK: UserStack = UserStack &#123;</span><br><span class="line">    data: [<span class="number">0</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在<code>linker.ld</code>中我们设置了内存布局，<code>stack</code>段从<code>0x80207000</code>开始。经过打印内存地址实验发现：<br>由于静态变量在编译期间就完成好了处理，如果代码如上面的顺序（先写内核栈后写用户栈），那么地址打印结果如下。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80209000</span><br><span class="line">Kernel sp addr: 0x80207000</span><br></pre></td></tr></table></figure>
+
+<p>显然是先放置KernelStack后放置UserStack。</p>
+<p>如果交换二者在rust代码中的位置（下面这种）。</p>
+<figure class="highlight rust"><table><tr><td class="code"><pre><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">UserStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; USER_STACK_SIZE]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#[repr(align(4096))]</span></span><br><span class="line"><span class="keyword">struct</span> <span class="title class_">KernelStack</span> &#123;</span><br><span class="line">    data: [<span class="type">u8</span>; KERNEL_STACK_SIZE]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">User sp addr: 0x80207000</span><br><span class="line">Kernel sp addr: 0x80209000</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="关于sscratch"><a href="#关于sscratch" class="headerlink" title="关于sscratch"></a>关于sscratch</h2><p>sscratch在程序的最开始是如何得知内核栈栈顶的位置的？</p>
+<p>在初始化内核栈（也就是第一次调用__restore)的时候，有</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">mv sp, a0 #将第一个参数，也就是Kernel的TrapContext的地址(位于KernelStack的栈顶)</span><br><span class="line">......</span><br><span class="line">csrrw sp, sscratch, sp </span><br><span class="line">sret</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="手动处理程序"><a href="#手动处理程序" class="headerlink" title="手动处理程序"></a>手动处理程序</h1><p>终于成功跑起来了，程序最后一个Bug竟然是少写了一条指令，保存上下文的汇编函数少写了一条<code>mv a0, sp</code>导致从第三个app就开始<code>panic LoadFault</code>。</p>
+<p>因为还不太会makefile，就手动处理和加载的程序。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># /os</span></span><br><span class="line">cargo build --release</span><br><span class="line"><span class="comment"># /user</span></span><br><span class="line">python3 build.py</span><br><span class="line"><span class="comment"># /os</span></span><br><span class="line">rust-objcopy --strip-all target/riscv64gc-unknown-none-elf/release/os -O binary target/riscv64gc-unknown-none-elf/release/os.bin</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="疑点"><a href="#疑点" class="headerlink" title="疑点"></a>疑点</h1><h2 id="1-关于函数调用栈"><a href="#1-关于函数调用栈" class="headerlink" title="1. 关于函数调用栈"></a>1. 关于函数调用栈</h2><p>在第三章第二节有言，</p>
+<p><code>函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</code></p>
+<p>突然意识到，编译器是如何识别我们设置的栈的？</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># os/src/entry.asm</span><br><span class="line">    .section .text.entry</span><br><span class="line">    .globl _start</span><br><span class="line">_start:</span><br><span class="line">    la sp, boot_stack_top</span><br><span class="line">    call rust_main</span><br><span class="line"></span><br><span class="line">    .section .bss.stack</span><br><span class="line">    .globl boot_stack_lower_bound</span><br><span class="line">boot_stack_lower_bound:</span><br><span class="line">    .space 4096 * 16</span><br><span class="line">    .globl boot_stack_top</span><br><span class="line">boot_stack_top:</span><br></pre></td></tr></table></figure>
+
+<p>上述汇编代码中的symbol boot_stack_lower_bound和boot_stack_top是固定名称吗？我写成my_stack_lower和my_stack_top又如何？我并没有查阅到相关资料，只能询问gpt4，它的回答是并非固定的。经过我个人实践检验，更改symbol名称会导致</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">error: linking with `rust-lld` failed: <span class="built_in">exit</span> status: 1</span><br><span class="line">  |</span><br><span class="line">  = note: LC_ALL=<span class="string">&quot;C&quot;</span> PATH=<span class="string">&quot;略&quot;</span> <span class="string">&quot;--gc-sections&quot;</span> <span class="string">&quot;-O1&quot;</span> <span class="string">&quot;-Tsrc/linker.ld&quot;</span></span><br><span class="line">  = note: rust-lld: error: undefined symbol: boot_stack_top</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(.text.entry+0x0)</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line">          rust-lld: error: undefined symbol: boot_stack_lower_bound</span><br><span class="line">          &gt;&gt;&gt; referenced by os.2c049dce14670689-cgu.0</span><br><span class="line">          &gt;&gt;&gt;               ..../os/target/riscv64gc-unknown-none-elf/release/deps/os-de411909dbbb6cf2.os.2c049dce14670689-cgu.0.rcgu.o:(rust_main)</span><br><span class="line">          </span><br><span class="line"></span><br><span class="line">error: could not compile `os` (bin <span class="string">&quot;os&quot;</span>) due to 1 previous error</span><br></pre></td></tr></table></figure>
+
+<p>目前我的猜测是RustSBI可能规定了这些符号名，目前还没有查阅RustSBI官方文档验证，打算先将整个rCore过一遍再回来查阅。</p>
 ]]></content>
       <categories>
         <category>self-learning-recording</category>
-        <category>CS61C</category>
+        <category>开源操作系统训练营笔记</category>
       </categories>
       <tags>
+        <tag>OS</tag>
         <tag>RISC-V</tag>
-        <tag>MIPS</tag>
-        <tag>计算机组成原理</tag>
-        <tag>汇编</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>String和Int在memory中的储存</title>
-    <url>/2023/10/19/String%E5%92%8CInt%E5%9C%A8memory%E4%B8%AD%E7%9A%84%E5%82%A8%E5%AD%98/</url>
-    <content><![CDATA[<p>CS61C的disc3中有一个关于String和Int在内存中储存区别的问题</p>
-<span id="more"></span>
-
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">int</span> arr[<span class="number">2</span>];</span><br><span class="line"><span class="comment">//storing &#x27;DEAD&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">0</span>] = <span class="number">0x44454144</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//storing &#x27;BEEF&#x27; in ascending order in arr[1]</span></span><br><span class="line">arr[<span class="number">1</span>] = <span class="number">0x42454546</span>;</span><br></pre></td></tr></table></figure>
-
-<p>问题是Does this C program store ‘DEADBEEF’ in memory the same way as storing it as a string?</p>
-<p>答案表明了，计算机在储存String的时候，无论是大端还是小端，String的最左端的字符都会储存在lowest address；</p>
-<p>然而integers的储存方式取决于系统架构，如果是大端模式，将会比较符合人类直觉地按照’DEADBEEF’储存。而如果是小端模式，将会把最低有效字节储存在低地址部分，就像是，0x44 0x41 0x45 0x44。</p>
-]]></content>
-      <categories>
-        <category>self-learning-recording</category>
-        <category>CS61C</category>
-      </categories>
-      <tags>
-        <tag>计算机组成原理</tag>
-        <tag>C</tag>
+        <tag>rCore</tag>
       </tags>
   </entry>
 </search>
