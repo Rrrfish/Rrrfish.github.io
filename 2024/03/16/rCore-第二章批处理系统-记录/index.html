@@ -28,10 +28,11 @@
 <meta property="og:description" content="希望能够每一章都能复现（抄）一遍代码，但第二章的代码就比第一章复杂很多了，任务也愈加困难。开个记录梳理一遍框架思路、阅读detail book的过程中仔细思考和还未理解的部分。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2024-03-16T13:39:51.000Z">
-<meta property="article:modified_time" content="2024-03-22T12:28:43.609Z">
+<meta property="article:modified_time" content="2024-03-22T12:36:28.516Z">
 <meta property="article:author" content="Rrrfish">
 <meta property="article:tag" content="OS">
 <meta property="article:tag" content="RISC-V">
+<meta property="article:tag" content="rCore">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://example.com/2024/03/16/rCore-%E7%AC%AC%E4%BA%8C%E7%AB%A0%E6%89%B9%E5%A4%84%E7%90%86%E7%B3%BB%E7%BB%9F-%E8%AE%B0%E5%BD%95/">
@@ -222,7 +223,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-03-22 20:28:43" itemprop="dateModified" datetime="2024-03-22T20:28:43+08:00">2024-03-22</time>
+                <time title="修改时间：2024-03-22 20:36:28" itemprop="dateModified" datetime="2024-03-22T20:36:28+08:00">2024-03-22</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -260,8 +261,7 @@
 <p>网上查阅结果表明RISC-V采用relaxed memory model（松散内存模型），这种内存模型可以改变指令执行顺序来提升处理器性能。fence.i的作用是让该指令之前的所有汇编指令都发生在fence.i之后的指令之前。这个指导书中的原文“ <em>它的功能是保证 在它之后的取指过程必须能够看到在它之前的所有对于取指内存区域的修改</em> ”相符。这样就可以在松散内存模型下保证指令的正确执行顺序，确保数据一致性和程序的正确同步。</p>
 <h2 id="Trap处理"><a href="#Trap处理" class="headerlink" title="Trap处理"></a>Trap处理</h2><h3 id="TrapContext"><a href="#TrapContext" class="headerlink" title="TrapContext"></a>TrapContext</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[repr(C)]</span></span><br><span class="line"><span class="keyword">pub</span> <span class="keyword">struct</span> <span class="title class_">TrapContext</span> &#123;</span><br><span class="line">    <span class="keyword">pub</span> x: [<span class="type">usize</span>; <span class="number">32</span>],</span><br><span class="line">    <span class="keyword">pub</span> sstatus: Sstatus,</span><br><span class="line">    <span class="keyword">pub</span> sepc: <span class="type">usize</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>x保存通用寄存器，其中，x10<del>x17保存函数参数，x17(a7)保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数<code>__alltraps</code>中需要保存<code>x1</code>、<code>x3</code>、<code>x4(sp)</code>和&#96;x5</del>x31&#96;。</p>
-<p>sstatus保存Trap之前CPU处于哪个特权级。</p>
+<p>x保存通用寄存器。<code>x10~x17</code> 保存函数参数，<code>x17(a7)</code> 保存syscall ID。我们在<code>Trap.S</code>中的保存上下文的汇编函数 <code>__alltraps</code> 中需要保存 <code>x1</code>、<code>x3 </code>、<code>x4(sp)</code> 和 <code>x5~x31</code> 。sstatus保存Trap之前CPU处于哪个特权级。</p>
 <p>sepc保存当Trap是异常时，保存Trap之前执行的最后一条指令的地址。</p>
 <h2 id="usize切片和u8切片（app的加载与清除）"><a href="#usize切片和u8切片（app的加载与清除）" class="headerlink" title="usize切片和u8切片（app的加载与清除）"></a>usize切片和u8切片（app的加载与清除）</h2><p>usize大小适配当前平台，一般为32或64，所以极为适合当作指针。<br>u8就是字节，可以用字节切片来清除和加载程序。</p>
 <p>写程序时不打细心，u8用成usize了，切片长度却没有改变，就报错了，排查了好半天。</p>
@@ -293,8 +293,7 @@
 
 
 <h1 id="疑点"><a href="#疑点" class="headerlink" title="疑点"></a>疑点</h1><h2 id="1-关于函数调用栈"><a href="#1-关于函数调用栈" class="headerlink" title="1. 关于函数调用栈"></a>1. 关于函数调用栈</h2><p>在第三章第二节有言，</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</span><br></pre></td></tr></table></figure>
-
+<p><code>函数调用包含在普通控制流（与异常控制流相对）之内，且始终用一个固定的栈来保存执行的历史记录，因此函数调用并不涉及控制流的特权级切换。但是我们依然可以将其看成调用者和被调用者两个执行过程的“切换”，二者的协作体现在它们都遵循调用规范，分别保存一部分通用寄存器，这样的好处是编译器能够有足够的信息来尽可能减少需要保存的寄存器的数目。虽然当时用了很大的篇幅来说明，但其实整个过程都是编译器负责完成的，我们只需设置好栈就行了。</code></p>
 <p>突然意识到，编译器是如何识别我们设置的栈的？</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"># os/src/entry.asm</span><br><span class="line">    .section .text.entry</span><br><span class="line">    .globl _start</span><br><span class="line">_start:</span><br><span class="line">    la sp, boot_stack_top</span><br><span class="line">    call rust_main</span><br><span class="line"></span><br><span class="line">    .section .bss.stack</span><br><span class="line">    .globl boot_stack_lower_bound</span><br><span class="line">boot_stack_lower_bound:</span><br><span class="line">    .space 4096 * 16</span><br><span class="line">    .globl boot_stack_top</span><br><span class="line">boot_stack_top:</span><br></pre></td></tr></table></figure>
 
@@ -313,6 +312,7 @@
           <div class="post-tags">
               <a href="/tags/OS/" rel="tag"># OS</a>
               <a href="/tags/RISC-V/" rel="tag"># RISC-V</a>
+              <a href="/tags/rCore/" rel="tag"># rCore</a>
           </div>
 
         
@@ -415,7 +415,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
